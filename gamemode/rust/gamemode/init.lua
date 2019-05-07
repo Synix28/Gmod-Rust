@@ -50,4 +50,15 @@ if( SERVER ) then
     end
 end
 
+if( SERVER ) then
+    local fol = GM.FolderName .. "/gamemode/vgui/"
+    local files, folders = file.Find(fol .. "*", "LUA")
+
+    for _, folder in SortedPairs(folders, true) do
+        for _, File in SortedPairs(file.Find(fol .. folder .. "*.lua", "LUA"), true) do
+            AddCSLuaFile(fol .. folder .. "/" .. File)
+        end
+    end
+end
+
 hook.Run("RUST_FinishedLoading")

@@ -40,4 +40,15 @@ if ( CLIENT ) then
     end
 end
 
+if ( CLIENT ) then
+    local root = GM.FolderName .. "/gamemode/vgui/"
+    local _, folders = file.Find(root .. "*", "LUA")
+
+    for _, folder in SortedPairs(folders, true) do
+        for _, File in SortedPairs(file.Find(root .. folder .. "/*.lua", "LUA"), true) do
+            include(root .. folder .. "/" .. File)
+        end
+    end
+end
+
 hook.Run("RUST_FinishedLoading")

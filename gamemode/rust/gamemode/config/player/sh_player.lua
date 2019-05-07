@@ -1,13 +1,13 @@
-// ----------------------------------------------
+--[[
 
-// CONFIG PLAYER
+    CONFIG PLAYER
 
-// ----------------------------------------------
+]]--
 
 RUST.PlayerConfig = RUST.PlayerConfig || {}
 
 RUST.PlayerConfig.WalkSpeed = 160
-RUST.PlayerConfig.Runspeed = 240
+RUST.PlayerConfig.RunSpeed = 240
 
 RUST.PlayerConfig.DuckSpeed = 0.3
 RUST.PlayerConfig.UnDuckSpeed = 0.3

@@ -1,0 +1,5 @@
+--[[
+
+    VGUI INVENTORY BASE
+
+]]--
