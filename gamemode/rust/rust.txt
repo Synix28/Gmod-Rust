@@ -1,0 +1,7 @@
+"rust"
+{
+	"base" "sandbox"
+	"title" "Rust"
+	"version" "1.0"
+	"menusystem" "1"
+}
