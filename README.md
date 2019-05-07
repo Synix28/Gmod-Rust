@@ -1,2 +1,4 @@
 # Gmod-Rust
-Garry's Mod Rust Gamemode
+A Garry's Mod Rust Gamemode
+
+# Work in progress
