@@ -55,7 +55,7 @@ if( SERVER ) then
     local files, folders = file.Find(fol .. "*", "LUA")
 
     for _, folder in SortedPairs(folders, true) do
-        for _, File in SortedPairs(file.Find(fol .. folder .. "*.lua", "LUA"), true) do
+        for _, File in SortedPairs(file.Find(fol .. folder .. "/*.lua", "LUA"), true) do
             AddCSLuaFile(fol .. folder .. "/" .. File)
         end
     end
