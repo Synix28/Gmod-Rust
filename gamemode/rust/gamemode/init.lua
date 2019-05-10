@@ -1,7 +1,5 @@
 RUST = RUST || {}
 
-RUST.debug = true
-
 // PRELOAD
 
 DeriveGamemode("sandbox")
@@ -10,54 +8,54 @@ DeriveGamemode("sandbox")
 
 hook.Run("RUST_StartedLoading")
 
-if( SERVER ) then
-    local fol = GM.FolderName .. "/gamemode/config/"
-    local files, folders = file.Find(fol .. "*", "LUA")
+AddCSLuaFile("libraries/sh_pon.lua")
+AddCSLuaFile("libraries/sh_netstream2.lua")
 
-    for _, folder in SortedPairs(folders, true) do
-        for _, File in SortedPairs(file.Find(fol .. folder .. "/sh_*.lua", "LUA"), true) do
-            AddCSLuaFile(fol .. folder .. "/" .. File)
-            include(fol .. folder .. "/" .. File)
-        end
+include("libraries/sh_pon.lua")
+include("libraries/sh_netstream2.lua")
 
-        for _, File in SortedPairs(file.Find(fol .. folder .. "/sv_*.lua", "LUA"), true) do
-            include(fol .. folder .. "/" .. File)
-        end
+local fol = GM.FolderName .. "/gamemode/config/"
+local files, folders = file.Find(fol .. "*", "LUA")
 
-        for _, File in SortedPairs(file.Find(fol .. folder .. "/cl_*.lua", "LUA"), true) do
-            AddCSLuaFile(fol .. folder .. "/" .. File)
-        end
+for _, folder in SortedPairs(folders, true) do
+    for _, File in SortedPairs(file.Find(fol .. folder .. "/sh_*.lua", "LUA"), true) do
+        AddCSLuaFile(fol .. folder .. "/" .. File)
+        include(fol .. folder .. "/" .. File)
+    end
+
+    for _, File in SortedPairs(file.Find(fol .. folder .. "/sv_*.lua", "LUA"), true) do
+        include(fol .. folder .. "/" .. File)
+    end
+
+    for _, File in SortedPairs(file.Find(fol .. folder .. "/cl_*.lua", "LUA"), true) do
+        AddCSLuaFile(fol .. folder .. "/" .. File)
     end
 end
 
-if( SERVER ) then
-    local fol = GM.FolderName .. "/gamemode/modules/"
-    local files, folders = file.Find(fol .. "*", "LUA")
+fol = GM.FolderName .. "/gamemode/modules/"
+files, folders = file.Find(fol .. "*", "LUA")
 
-    for _, folder in SortedPairs(folders, true) do
-        for _, File in SortedPairs(file.Find(fol .. folder .. "/sh_*.lua", "LUA"), true) do
-            AddCSLuaFile(fol .. folder .. "/" .. File)
-            include(fol .. folder .. "/" .. File)
-        end
+for _, folder in SortedPairs(folders, true) do
+    for _, File in SortedPairs(file.Find(fol .. folder .. "/sh_*.lua", "LUA"), true) do
+        AddCSLuaFile(fol .. folder .. "/" .. File)
+        include(fol .. folder .. "/" .. File)
+    end
 
-        for _, File in SortedPairs(file.Find(fol .. folder .. "/sv_*.lua", "LUA"), true) do
-            include(fol .. folder .. "/" .. File)
-        end
+    for _, File in SortedPairs(file.Find(fol .. folder .. "/sv_*.lua", "LUA"), true) do
+        include(fol .. folder .. "/" .. File)
+    end
 
-        for _, File in SortedPairs(file.Find(fol .. folder .. "/cl_*.lua", "LUA"), true) do
-            AddCSLuaFile(fol .. folder .. "/" .. File)
-        end
+    for _, File in SortedPairs(file.Find(fol .. folder .. "/cl_*.lua", "LUA"), true) do
+        AddCSLuaFile(fol .. folder .. "/" .. File)
     end
 end
 
-if( SERVER ) then
-    local fol = GM.FolderName .. "/gamemode/vgui/"
-    local files, folders = file.Find(fol .. "*", "LUA")
+fol = GM.FolderName .. "/gamemode/vgui/"
+files, folders = file.Find(fol .. "*", "LUA")
 
-    for _, folder in SortedPairs(folders, true) do
-        for _, File in SortedPairs(file.Find(fol .. folder .. "/*.lua", "LUA"), true) do
-            AddCSLuaFile(fol .. folder .. "/" .. File)
-        end
+for _, folder in SortedPairs(folders, true) do
+    for _, File in SortedPairs(file.Find(fol .. folder .. "/*.lua", "LUA"), true) do
+        AddCSLuaFile(fol .. folder .. "/" .. File)
     end
 end
 
