@@ -4,7 +4,7 @@
 
 ]]--
 
-RUST.Inventory.Panel = RUST.Inventory.Gui || {}
+RUST.Inventory.Panel = RUST.Inventory.Panel || {}
 
 function GM:ScoreboardShow()
     RUST.Inventory.OpenMenu()
