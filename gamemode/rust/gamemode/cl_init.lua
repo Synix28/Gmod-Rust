@@ -2,7 +2,7 @@ RUST = RUST || {}
 RUST.VGUI = RUST.VGUI || {}
 
 // PRELOAD
-
+// HAI!
 DeriveGamemode("sandbox")
 
 // LOAD
