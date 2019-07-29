@@ -4,13 +4,13 @@
 
 ]]--
 
-hook.Add("PlayerButtonDown", "RUST_OpenInventory", function(ply, key)
+hook.Add("PlayerButtonDown", "RUST_OpenInventory", function(ply, key) // Inventar öffnen
     if( key == KEY_TAB ) then
         netstream.Start(ply, "RUST_OpenInventory")
     end
 end)
 
-hook.Add("PlayerInitialSpawn", "RUST_SetupInventory", function(ply)
+hook.Add("PlayerInitialSpawn", "RUST_SetupInventory", function(ply) // Inventare erstellen, Daten abfragen und den Player updaten
     local steamid = ply:SteamID()
 
     RUST.Inventories["Player_Inv_" .. steamid] = {}
@@ -24,7 +24,7 @@ hook.Add("PlayerInitialSpawn", "RUST_SetupInventory", function(ply)
     local inventory = RUST.Inventories["Player_Inv_" .. steamid].slots
     local hotbar = RUST.Inventories["Player_Hotbar_" .. steamid].slots
 
-    inventory.owner = ply
+    inventory.owner = ply // Owner setzen
     hotbar.owner = ply
     RUST.Inventories["Player_Armor_" .. steamid].owner = ply
 
@@ -83,14 +83,14 @@ end)
 
 // ------------------------------------------------------------------
 
-hook.Add("DatabaseInitialized", "RUST_Inventory_SetupDB", function()
+hook.Add("DatabaseInitialized", "RUST_Inventory_SetupDB", function() // Tables erstellen
     MySQLite.query("CREATE TABLE IF NOT EXISTS player_inventory ( steamid varchar(255) NOT NULL, slot int NOT NULL, amount int, itemid varchar(255), CONSTRAINT iid PRIMARY KEY (slot, steamid) )")
     MySQLite.query("CREATE TABLE IF NOT EXISTS player_hotbar ( steamid varchar(255) NOT NULL, slot int NOT NULL, amount int, itemid varchar(255), CONSTRAINT hid PRIMARY KEY (slot, steamid) )")
 end)
 
 // ------------------------------------------------------------------
 
-netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID, toSlotInv)
+netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID, toSlotInv) // Item bewegen SV
     if( !RUST.Inventories[fromSlotInv] || !RUST.Inventories[toSlotInv] )then return end
     
     local fromSlotOwner = RUST.Inventories[fromSlotInv].owner
@@ -151,7 +151,7 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
     print("-------------------------------------------------------------")
 end)
 
-netstream.Hook("RUST_Split", function(ply, inv, freeSlotID, slotID)
+netstream.Hook("RUST_Split", function(ply, inv, freeSlotID, slotID) // Item splitten SV
     local invData = RUST.Inventories[inv].slots
 
     if( freeSlotID && !invData[freeSlotID] && invData[slotID].amount > 1 )then
@@ -172,7 +172,7 @@ netstream.Hook("RUST_Split", function(ply, inv, freeSlotID, slotID)
     print("-------------------------------------------------------------")
 end)
 
-netstream.Hook("RUST_Drop", function(ply, inv, slot)
+netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
     local invData = RUST.Inventories[inv].slots
 
     if( invData[slot] )then
