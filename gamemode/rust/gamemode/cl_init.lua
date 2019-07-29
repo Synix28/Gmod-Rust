@@ -1,4 +1,5 @@
 RUST = RUST || {}
+RUST.VGUI = RUST.VGUI || {}
 
 // PRELOAD
 

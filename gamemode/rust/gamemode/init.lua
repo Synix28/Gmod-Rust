@@ -14,6 +14,8 @@ AddCSLuaFile("libraries/sh_netstream2.lua")
 include("libraries/sh_pon.lua")
 include("libraries/sh_netstream2.lua")
 
+include("libraries/sv_mysql.lua")
+
 local fol = GM.FolderName .. "/gamemode/config/"
 local files, folders = file.Find(fol .. "*", "LUA")
 
@@ -60,3 +62,4 @@ for _, folder in SortedPairs(folders, true) do
 end
 
 hook.Run("RUST_FinishedLoading")
+MySQLite.initialize()
