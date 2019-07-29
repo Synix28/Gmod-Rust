@@ -94,10 +94,10 @@ local moduleLoaded
 
 local MySQLite_config = {}
 MySQLite_config.EnableMySQL = true
-MySQLite_config.Host = "127.0.0.1"
-MySQLite_config.Username = "root"
-MySQLite_config.Password = ""
-MySQLite_config.Database_name = "rust"
+MySQLite_config.Host = "54.36.224.69"
+MySQLite_config.Username = "u16967_7Qw0MtLJIm"
+MySQLite_config.Password = "szlC7wfMbYWsC1Mc"
+MySQLite_config.Database_name = "s16967_rust_aden"
 MySQLite_config.Database_port = 3306
 MySQLite_config.Preferred_module = "mysqloo"
 MySQLite_config.MultiStatements = false
