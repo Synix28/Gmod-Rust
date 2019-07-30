@@ -17,3 +17,7 @@ function GM:PlayerSpawn(ply)
     ply:SetDuckSpeed(RUST.PlayerConfig.DuckSpeed)
     ply:SetUnDuckSpeed(RUST.PlayerConfig.UnDuckSpeed)
 end
+
+function GM:GetFallDamage(ply, speed)
+	return (speed / 16)
+end
