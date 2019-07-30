@@ -234,7 +234,9 @@ RUST.Recipes["furnace"] = {
     needed = {
         ["stones"] = 15,
         ["wood"] = 20,
-        ["low_grade_fuel"] = 10
+        ["low_grade_fuel"] = 10,
+        ["bed"] = 20,
+        ["campfire"] = 20,
     }
 }
 
@@ -300,4 +302,19 @@ function RUST.HasSpace(inv, itemid, amount)
     end
 
     return false
+end
+
+function RUST.GetItemAmountFromInv(inv, itemid)
+    local invData = RUST.Inventories[inv].slots
+    local amount = false
+
+    for slot, data in ipairs(invData) do
+        if( data && data.itemid == itemid )then
+            if( !amount )then amount = 0 end
+
+            amount = amount + data.amount
+        end
+    end
+
+    return amount
 end
