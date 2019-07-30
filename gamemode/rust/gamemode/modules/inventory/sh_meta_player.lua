@@ -30,3 +30,7 @@ if( SERVER )then
         return false
     end
 end
+
+function PLAYER:GetInv()
+    return "Player_Inv_" .. self:SteamID()
+end
