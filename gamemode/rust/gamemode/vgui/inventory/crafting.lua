@@ -26,6 +26,7 @@ local PANEL = {}
 
 function PANEL:Init()
     self.craftAmount = 1 // wie viele gecraftet werden sollen
+    self.selectedCraft = nil // ausgewähltes Blueprint
 
     self:SetSize(250, 435)
     self:SetPos(ScrW() / 2 + (490 / 2) + 5, ScrH() / 2 - (435 / 2))
@@ -172,6 +173,8 @@ local PANEL = {}
 function PANEL:Init()
     self:SetTall(20)
     self:SetText("")
+
+    self.base = self:GetParent():GetParent():GetParent()
 end
 
 function PANEL:SetRecipe(recipe)
@@ -179,13 +182,11 @@ function PANEL:SetRecipe(recipe)
 end
 
 function PANEL:DoClick()
-    local base = self:GetParent():GetParent():GetParent()
+    self.base.selectedCraft = self.recipe
+    self.base.neededScroll:Clear()
 
-    base.selectedCraft = self.recipe
-    base.neededScroll:Clear()
-
-    for item, amount in pairs(RUST.Recipes[base.selectedCraft].needed) do
-        local neededItem = base.neededScroll:Add("RUST_ListItem")
+    for item, amount in pairs(RUST.Recipes[self.base.selectedCraft].needed) do
+        local neededItem = self.base.neededScroll:Add("RUST_ListItem")
         neededItem:SetItemID(item)
         neededItem:SetNeededAmount(amount)
         neededItem:SetTall(18)
@@ -197,7 +198,7 @@ end
 function PANEL:Paint(w, h)
     if( !self.recipe )then return end
 
-    if( self:IsHovered() )then
+    if( self:IsHovered() || self.base && self.base.selectedCraft && self.base.selectedCraft == self.recipe )then
         surface.SetDrawColor(80, 80, 80, 255)
         surface.DrawRect(0, 0, w, h)
     else
@@ -281,7 +282,26 @@ function PANEL:Paint(w, h)
 end
 
 function PANEL:DoClick()
-    LocalPlayer():EmitSound("item/sfx/craft_start.wav", 75)
+    local base = self:GetParent()
+    local ply = LocalPlayer()
+
+    if( !base.selectedCraft )then return end
+
+    local hasEnough = true
+
+    for item, amount in pairs(RUST.Recipes[base.selectedCraft].needed) do
+        local hasAmount = RUST.GetItemAmountFromInv(ply:GetInv(), item)
+
+        if( !hasAmount || hasAmount < ( amount * base.craftAmount ) )then
+            hasEnough = false
+        end
+    end
+
+    if( hasEnough )then
+        ply:EmitSound("item/sfx/craft_start.wav", 75)
+
+        netstream.Start("RUST_CraftItem", base.selectedCraft, base.craftAmount)
+    end
 end
 
 vgui.Register("RUST_CraftButton", PANEL, "DButton")
@@ -347,17 +367,17 @@ function PANEL:Paint(w, h)
 end
 
 function PANEL:DoClick()
-    local parent = self:GetParent()
+    local base = self:GetParent()
 
     if( input.IsKeyDown(KEY_LSHIFT) )then
-        if( (parent.craftAmount - 10) < 1 )then
-            parent.craftAmount = 1
+        if( (base.craftAmount - 10) < 1 )then
+            base.craftAmount = 1
         else
-            parent.craftAmount = parent.craftAmount - 10
+            base.craftAmount = base.craftAmount - 10
         end
     else
-        if( (parent.craftAmount - 1) >= 1 )then
-            parent.craftAmount = parent.craftAmount - 1
+        if( (base.craftAmount - 1) >= 1 )then
+            base.craftAmount = base.craftAmount - 1
         end
     end
 end
