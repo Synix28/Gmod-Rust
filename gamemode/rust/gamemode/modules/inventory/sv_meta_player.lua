@@ -24,13 +24,12 @@ function PLAYER:AddItem(inv, itemid, amount)
                 if( freeAmount <= remainingAmount )then
                     invData[slot].amount = max
                     remainingAmount = remainingAmount - freeAmount
-                    print(slot, invData[slot].amount)
                 elseif( freeAmount > remainingAmount )then
                     invData[slot].amount = invData[slot].amount + remainingAmount
                     remainingAmount = 0
                 end
 
-                netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
             end
 
             if( !data )then
@@ -45,15 +44,13 @@ function PLAYER:AddItem(inv, itemid, amount)
                     remainingAmount = 0
                 end
 
-                netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
             end
 
             if( remainingAmount <= 0 )then
-                return true
+                break
             end
         end
-
-        PrintTable(RUST.Inventories[inv].slots)
 
         return true
     end
@@ -62,5 +59,36 @@ function PLAYER:AddItem(inv, itemid, amount)
 end
 
 function PLAYER:RemoveItem(inv, itemid, amount)
+    local invData = RUST.Inventories[inv].slots
+    local availableAmount = RUST.GetItemAmountFromInv(self:GetInv(), itemid)
 
+    if( availableAmount && availableAmount >= amount )then
+        for slot, data in ipairs(invData) do
+            if( data && data.itemid == itemid )then
+                if( data.amount <= amount )then
+                    local amountToRemove = data.amount
+                    
+                    invData[slot] = false
+                    amount = amount - amountToRemove
+                else
+                    invData[slot].amount = invData[slot].amount - amount
+                    amount = 0
+                end
+
+                if( !invData[slot] )then
+                    netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, 0)
+                else
+                    netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                end
+
+                if( amount <= 0 )then
+                    break
+                end
+            end
+        end
+
+        return true
+    end
+
+    return false
 end

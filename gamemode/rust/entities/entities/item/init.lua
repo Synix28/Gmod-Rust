@@ -26,7 +26,7 @@ end
 
 
 function ENT:Use(caller, activator)
-    if( caller:IsPlayer() && caller:AddItem("Player_Inv_" .. caller:SteamID(), self:GetItemID(), self:GetAmount()) )then
+    if( caller:IsPlayer() && caller:AddItem(caller:GetInv(), self:GetItemID(), self:GetAmount()) )then
         self:Remove()
     end
 end

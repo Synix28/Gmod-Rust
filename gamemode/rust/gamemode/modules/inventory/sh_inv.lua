@@ -333,7 +333,10 @@ function RUST.HasSpaceForAmount(inv, itemid, amount)
         local invFreeSlots = RUST.FreeSlots(inv, neededSlots)
 
         if( #invFreeSlots >= neededSlots )then
-            table.Merge(freeSlots, invFreeSlots)
+            for _, slot in ipairs(invFreeSlots) do
+                table.insert(freeSlots, slot)
+            end
+
             return freeSlots
         end
     end
