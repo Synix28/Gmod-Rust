@@ -286,6 +286,7 @@ function PANEL:DoClick()
     local ply = LocalPlayer()
 
     if( !base.selectedCraft )then return end
+    if( !RUST.HasSpaceForAmount(ply:GetInv(), base.selectedCraft, base.craftAmount) )then return end
 
     local hasEnough = true
 

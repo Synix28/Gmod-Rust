@@ -30,8 +30,16 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount) // Inventa
     if( invData[slot] )then // Wenn Slot bereits vewendet, dann
         invData[slot].amount = amount // amount setzen
 
+        if( invData[slot].amount == 0 )then
+            invData[slot] = false
+        end
+
         if( RUST.VGUI.BasePanel && IsValid(RUST.VGUI.BasePanel) && RUST.VGUI.BasePanel.inventory )then
-            RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+            if( !invData[slot] )then
+                RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:Remove()
+            else
+                RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+            end
         end
     else
         invData[slot] = {} // ansonsten Item erstellen
@@ -124,7 +132,7 @@ end
 function RUST.Split(slot) // Item splitten
     local invData = RUST.Inventories[slot.inv].slots
 
-    local freeSlotID = RUST.FreeSlotAvailable(slot.inv) // freien Slot abfragen
+    local freeSlotID = RUST.FreeSlot(slot.inv) // freien Slot abfragen
     local slotItem = slot:GetChildren()[1]
 
     if( freeSlotID && slotItem && invData[slot.id].amount > 1 )then // wenn amount größer als 1

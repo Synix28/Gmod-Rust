@@ -7,6 +7,8 @@
 netstream.Hook("RUST_CraftItem", function(ply, itemid, craftAmount) // Item craften
     local invData = RUST.Inventories[ply:GetInv()].slots
 
+    if( !RUST.HasSpaceForAmount(ply:GetInv(), itemid, craftAmount) )then return end
+
     local hasEnough = true
 
     for item, amount in pairs(RUST.Recipes[itemid].needed) do
@@ -19,7 +21,7 @@ netstream.Hook("RUST_CraftItem", function(ply, itemid, craftAmount) // Item craf
 
     if( hasEnough )then
         for item, amount in pairs(RUST.Recipes[itemid].needed) do
-            ply:RemoveItem(ply:GetInv(), item, craftAmount)
+            ply:RemoveItem(ply:GetInv(), item, craftAmount * amount)
         end
 
         ply:AddItem(ply:GetInv(), itemid, craftAmount)
