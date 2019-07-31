@@ -275,30 +275,67 @@ table.insert(RUST.Categories["survival"].recipes, "metal_door")
 
 // ------------------------------------------------------------------
 
-function RUST.FreeSlotAvailable(inv)
-    for k, v in ipairs(RUST.Inventories[inv].slots) do
-        if( !v )then
-            return k
+function RUST.FreeSlot(inv)
+    for slot, data in ipairs(RUST.Inventories[inv].slots) do
+        if( !data )then
+            return slot
         end
     end
 
     return false
 end
 
-function RUST.HasSpace(inv, itemid, amount)
-    local invData = RUST.Inventories[inv].slots
-    local max = RUST.Items[itemid].max
+function RUST.FreeSlots(inv, amount)
+    local freeSlots = {}
 
-    for slot, data in ipairs(invData) do
-        if( data && data.itemid == itemid && ( data.amount + amount ) <= max )then
-            return slot
+    if( amount )then
+        for slot, data in ipairs(RUST.Inventories[inv].slots) do
+            if( !data )then
+                table.insert(freeSlots, slot)
+                amount = amount - 1
+
+                if( amount <= 0 )then
+                    return freeSlots
+                end
+            end
+        end
+    else
+        for slot, data in ipairs(RUST.Inventories[inv].slots) do
+            if( !data )then
+                table.insert(freeSlots, slot)
+            end
         end
     end
 
-    local freeSlot = RUST.FreeSlotAvailable(inv)
+    return freeSlots
+end
 
-    if( freeSlot )then
-        return freeSlot
+function RUST.HasSpaceForAmount(inv, itemid, amount)
+    local invData = RUST.Inventories[inv].slots
+    local max = RUST.Items[itemid].max
+
+    local freeSlots = {}
+    local remainingAmount = amount
+
+    for slot, data in ipairs(invData) do
+        if( data && data.itemid == itemid && data.amount < max )then
+            remainingAmount = remainingAmount - ( max - data.amount )
+            table.insert(freeSlots, slot)
+
+            if( remainingAmount <= 0 )then
+                return freeSlots
+            end
+        end
+    end
+
+    if( remainingAmount > 0 )then
+        local neededSlots = math.ceil(remainingAmount / max)
+        local invFreeSlots = RUST.FreeSlots(inv, neededSlots)
+
+        if( #invFreeSlots >= neededSlots )then
+            table.Merge(freeSlots, invFreeSlots)
+            return freeSlots
+        end
     end
 
     return false

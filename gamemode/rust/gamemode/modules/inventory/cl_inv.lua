@@ -28,7 +28,7 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount) // Inventa
     local invData = RUST.Inventories[inv].slots
 
     if( invData[slot] )then // Wenn Slot bereits vewendet, dann
-        invData[slot].amount = invData[slot].amount + amount // amount dazu adden
+        invData[slot].amount = amount // amount setzen
 
         if( RUST.VGUI.BasePanel && IsValid(RUST.VGUI.BasePanel) && RUST.VGUI.BasePanel.inventory )then
             RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
