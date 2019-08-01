@@ -22,10 +22,18 @@ function PANEL:Init()
     local inv = "Player_Armor_" .. LocalPlayer():SteamID()
     local invData = RUST.Inventories[inv].slots
 
+    local types = {
+        "HEAD",
+        "CHEST",
+        "LEGS",
+        "BOOTS"
+    }
+
     for i = 1, 4 do
         local Slot = self.list:Add( "RUST_Slot" )
         Slot:SetID( i )
         Slot:SetInv(inv)
+        Slot:SetMiddleText(types[i])
 
         if( invData[i] ) then
             local Item = vgui.Create("RUST_Item", Slot)

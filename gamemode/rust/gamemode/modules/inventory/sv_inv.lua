@@ -106,6 +106,48 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
         local fromSlotInvData = RUST.Inventories[fromSlotInv].slots
         local toSlotInvData = RUST.Inventories[toSlotInv].slots
 
+        // check for armor inv
+
+        if( toSlotInv == ply:GetArmorInv() )then
+            local itemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
+            local types = {
+                RUST_ARMOR_TYPE_HEAD,
+                RUST_ARMOR_TYPE_CHEST,
+                RUST_ARMOR_TYPE_LEGS,
+                RUST_ARMOR_TYPE_FEET
+            }
+
+            if( !itemData.isArmor || itemData.type != types[toSlotID] )then
+                return
+            end
+
+            for k, bodygroupData in ipairs(itemData.bodygroups) do
+                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
+            end
+        elseif( fromSlotInv == ply:GetArmorInv() && toSlotInvData[toSlotID] )then
+            local itemData = RUST.Items[toSlotInvData[toSlotID].itemid]
+            local types = {
+                RUST_ARMOR_TYPE_HEAD,
+                RUST_ARMOR_TYPE_CHEST,
+                RUST_ARMOR_TYPE_LEGS,
+                RUST_ARMOR_TYPE_FEET
+            }
+
+            if( !itemData.isArmor || itemData.type != types[fromSlotID] )then
+                return
+            end
+
+            for k, bodygroupData in ipairs(itemData.bodygroups) do
+                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
+            end
+        elseif( fromSlotInv == ply:GetArmorInv() && !toSlotInvData[toSlotID] )then
+            local itemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
+
+            for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
+                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
+            end
+        end
+
         if( toSlotInvData[toSlotID] )then
             if( fromSlotInvData[fromSlotID].itemid == toSlotInvData[toSlotID].itemid )then
                 local amount = fromSlotInvData[fromSlotID].amount + toSlotInvData[toSlotID].amount
@@ -176,11 +218,19 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
     local invData = RUST.Inventories[inv].slots
 
     if( invData[slot] )then
-        local ent = ents.Create("item")
+        local ent = ents.Create("rust_item")
         ent:SetPos( ply:EyePos() + ply:GetAimVector() * 50 )
             ent:SetItemID(invData[slot].itemid)
             ent:SetAmount(invData[slot].amount)
         ent:Spawn()
+
+        if( inv == ply:GetArmorInv() )then
+            local itemData = RUST.Items[invData[slot].itemid]
+
+            for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
+                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
+            end
+        end
 
         invData[slot] = false
     end
@@ -190,4 +240,18 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
     print("-------------------------------------------------------------")
 end)
 
+netstream.Hook("RUST_InventoryClosed", function(ply)
+    hook.Run("RUST_InventoryClosed", ply)
+end) 
+
 // ------------------------------------------------------------------
+
+hook.Add("RUST_InventoryClosed", "RUST_Looting", function(ply)
+    if( ply.Looting && IsValid(ply.Looting) )then
+        ply.Looting:SetUsedBy(nil)
+
+        ply.Looting:CheckInv()
+        
+        ply.Looting = nil
+    end
+end)

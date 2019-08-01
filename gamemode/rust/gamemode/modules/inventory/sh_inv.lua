@@ -11,6 +11,28 @@ RUST.Inventories = RUST.Inventories || {}
 
 // ------------------------------------------------------------------
 
+RUST_ARMOR_TYPE_HEAD = 1
+RUST_ARMOR_TYPE_CHEST = 2
+RUST_ARMOR_TYPE_LEGS = 3
+RUST_ARMOR_TYPE_FEET = 4
+
+RUST.DefaultBodyGroups = {
+    [RUST_ARMOR_TYPE_HEAD] = {
+        {8, 0}
+    },
+    [RUST_ARMOR_TYPE_CHEST] = {
+        {2, 0}
+    },
+    [RUST_ARMOR_TYPE_LEGS] = {
+        {3, 2}
+    },
+    [RUST_ARMOR_TYPE_FEET] = {
+        {5, 0}
+    }
+}
+
+// ------------------------------------------------------------------
+
 RUST.Items["wood"] = {
     name = "Wood",
     icon = Material("rust/wood.png"),
@@ -157,6 +179,56 @@ RUST.Items["metal_door"] = {
 
 // ------------------------------------------------------------------
 
+RUST.Items["cloth_helmet"] = {
+    name = "Cloth Helmet",
+    icon = Material("rust/helmet_1_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_HEAD,
+    bodygroups = {
+        {8, 1}
+    }
+}
+
+RUST.Items["cloth_vest"] = {
+    name = "Cloth Vest",
+    icon = Material("rust/vest_1_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_CHEST,
+    bodygroups = {
+        {2, 2}
+    }
+}
+
+RUST.Items["cloth_pants"] = {
+    name = "Cloth Pants",
+    icon = Material("rust/pants_1_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_LEGS,
+    bodygroups = {
+        {3, 2}
+    }
+}
+
+RUST.Items["cloth_boots"] = {
+    name = "Cloth Boots",
+    icon = Material("rust/boots_1_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_FEET,
+    bodygroups = {
+        {5, 2}
+    }
+}
+
+// ------------------------------------------------------------------
+
 RUST.Categories["survival"] = {
     sort = 1,
     name = "Survival",
@@ -210,6 +282,7 @@ RUST.Categories["parts"] = {
 RUST.Recipes["bed"] = {
     default = true,
     workbench = false,
+    time = 10,
     needed = {
         ["cloth"] = 40,
         ["metal_fragments"] = 100
@@ -221,6 +294,7 @@ table.insert(RUST.Categories["survival"].recipes, "bed")
 RUST.Recipes["campfire"] = {
     default = true,
     workbench = false,
+    time = 2,
     needed = {
         ["wood"] = 5
     }
@@ -231,6 +305,7 @@ table.insert(RUST.Categories["survival"].recipes, "campfire")
 RUST.Recipes["furnace"] = {
     default = true,
     workbench = false,
+    time = 15,
     needed = {
         ["stones"] = 15,
         ["wood"] = 20,
@@ -245,6 +320,7 @@ table.insert(RUST.Categories["survival"].recipes, "furnace")
 RUST.Recipes["low_grade_fuel"] = { 
     default = true,
     workbench = false,
+    time = 2,
     needed = {
         ["animal_fat"] = 2,
         ["cloth"] = 1
@@ -256,6 +332,7 @@ table.insert(RUST.Categories["survival"].recipes, "low_grade_fuel")
 RUST.Recipes["low_quality_metal"] = { 
     default = true,
     workbench = false,
+    time = 4,
     needed = {
         ["metal_fragments"] = 15
     }
@@ -266,6 +343,7 @@ table.insert(RUST.Categories["survival"].recipes, "low_quality_metal")
 RUST.Recipes["metal_door"] = { 
     default = true,
     workbench = false,
+    time = 15,
     needed = {
         ["metal_fragments"] = 200
     }
