@@ -12,6 +12,8 @@ end
 netstream.Hook("RUST_OpenInventory", function()
     if( !RUST.VGUI.BasePanel )then // Wenn nicht offen, dann ...
         RUST.VGUI.BasePanel = vgui.Create("RUST_Base")
+        RUST.VGUI.BasePanel:OpenArmor()
+        RUST.VGUI.BasePanel:OpenCrafting()
     end
 end)
 
@@ -54,6 +56,16 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount) // Inventa
     end
 end)
 
+netstream.Hook("RUST_OpenLoot", function(inv)
+    if( !RUST.VGUI.BasePanel )then // Wenn nicht offen, dann ...
+        RUST.VGUI.BasePanel = vgui.Create("RUST_Base")
+        RUST.VGUI.BasePanel:OpenArmor()
+        RUST.VGUI.BasePanel:OpenLoot(inv)
+    end
+end)
+
+
+
 // ------------------------------------------------------------------
 
 function RUST.MoveItem(fromSlot, toSlot) // Item im Inventar moven, von Inventar zu Inventar moven, Items tauschen
@@ -66,6 +78,38 @@ function RUST.MoveItem(fromSlot, toSlot) // Item im Inventar moven, von Inventar
 
     local fromSlotInvData = RUST.Inventories[fromSlot.inv].slots
     local toSlotInvData = RUST.Inventories[toSlot.inv].slots
+
+    // check for armor inv
+
+    if( toSlot.inv == ply:GetArmorInv() )then
+        local itemData = RUST.Items[fromSlotInvData[fromSlot.id].itemid]
+        local types = {
+            RUST_ARMOR_TYPE_HEAD,
+            RUST_ARMOR_TYPE_CHEST,
+            RUST_ARMOR_TYPE_LEGS,
+            RUST_ARMOR_TYPE_FEET
+        }
+
+        if( !itemData.isArmor || itemData.type != types[toSlot.id] )then
+            return
+        end
+
+        ply:EmitSound("item/sfx/zipper.wav", 75)
+    elseif( fromSlot.inv == ply:GetArmorInv() && toSlotInvData[toSlot.id] )then
+        local itemData = RUST.Items[toSlotInvData[toSlot.id].itemid]
+        local types = {
+            RUST_ARMOR_TYPE_HEAD,
+            RUST_ARMOR_TYPE_CHEST,
+            RUST_ARMOR_TYPE_LEGS,
+            RUST_ARMOR_TYPE_FEET
+        }
+
+        if( !itemData.isArmor || itemData.type != types[fromSlot.id] )then
+            return
+        end
+
+        ply:EmitSound("item/sfx/zipper.wav", 75)
+    end
 
     if( toSlotItem )then
         if( fromSlotItem.itemid == toSlotItem.itemid )then // Wenn geleiches Item, dann ...

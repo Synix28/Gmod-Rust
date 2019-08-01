@@ -27,6 +27,10 @@ function PANEL:Paint(w, h)
     if( self.ishotbar )then
         draw.SimpleText(self.id, "Rust_Item_Amount", 4, 7, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
     end
+
+    if( self.middleText )then
+        draw.SimpleText(self.middleText, "Rust_Item_Amount", w / 2, h / 2, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    end
 end
 
 function PANEL:SetID(id)
@@ -35,6 +39,10 @@ end
 
 function PANEL:SetInv(inv)
     self.inv = inv
+end
+
+function PANEL:SetMiddleText(middleText)
+    self.middleText = middleText
 end
 
 function PANEL:SetHotbar(ishotbar)

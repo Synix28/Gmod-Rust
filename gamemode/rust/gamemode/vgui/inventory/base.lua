@@ -17,12 +17,23 @@ function PANEL:Init()
     end, {} )
 
     self.inventory = vgui.Create("RUST_Inventory", self)
-    self.armor = vgui.Create("RUST_Armor", self)
-    self.crafting = vgui.Create("RUST_Crafting", self)
 
     if( RUST.VGUI.Hotbar && IsValid(RUST.VGUI.Hotbar) )then
         RUST.VGUI.Hotbar:SetParent(self)
     end
+end
+
+function PANEL:OpenArmor()
+    self.armor = vgui.Create("RUST_Armor", self)
+end
+
+function PANEL:OpenCrafting()
+    self.crafting = vgui.Create("RUST_Crafting", self)
+end
+
+function PANEL:OpenLoot(inv)
+    self.loot = vgui.Create("RUST_Loot", self)
+    self.loot:SetInv(inv)
 end
 
 function PANEL:Paint(w, h)
@@ -32,6 +43,8 @@ function PANEL:OnRemove()
     if( RUST.VGUI.Hotbar && IsValid(RUST.VGUI.Hotbar) )then
         RUST.VGUI.Hotbar:SetParent(nil)
     end
+
+    netstream.Start("RUST_InventoryClosed")
 end
 
 function PANEL:OnKeyCodePressed(key)

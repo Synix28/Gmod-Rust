@@ -139,6 +139,13 @@ function PANEL:Paint(w, h)
 
     surface.SetDrawColor(0, 0, 0, 255)
     surface.DrawRect(10, 415, 70, 15)
+
+    if( RUST.CraftTime && RUST.CraftTime > CurTime() )then
+        surface.SetDrawColor(255, 165, 0, 255)
+        surface.DrawRect(10, 415, 70 * ((( RUST.CraftTime - CurTime()) / RUST.CraftTimeSum ) - 1) * -1, 15)
+
+        draw.SimpleText(math.Round((CurTime() - RUST.CraftTime) * -1, 1), "RUST_Craft_Button_Text", 10 + 35, 415 + 7.5, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    end
 end
 
 vgui.Register("RUST_Crafting", PANEL, "DPanel")
@@ -278,12 +285,24 @@ function PANEL:Paint(w, h)
         surface.DrawRect(1, 1, w - 2, h - 2)
     end
 
-    draw.SimpleText("Craft", "RUST_Craft_Button_Text", w / 2, h / 2, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    if( RUST.CraftTime && RUST.CraftTime > CurTime() )then
+        draw.SimpleText("Cancel", "RUST_Craft_Button_Text", w / 2, h / 2, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    else
+        draw.SimpleText("Craft", "RUST_Craft_Button_Text", w / 2, h / 2, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    end
 end
 
 function PANEL:DoClick()
     local base = self:GetParent()
     local ply = LocalPlayer()
+
+    if( RUST.CraftTime && RUST.CraftTime > CurTime() )then
+        RUST.CraftTime = nil
+
+        netstream.Start("RUST_CancelCraft")
+
+        return
+    end
 
     if( !base.selectedCraft )then return end
     if( !RUST.HasSpaceForAmount(ply:GetInv(), base.selectedCraft, base.craftAmount) )then return end
@@ -300,6 +319,9 @@ function PANEL:DoClick()
 
     if( hasEnough )then
         ply:EmitSound("item/sfx/craft_start.wav", 75)
+
+        RUST.CraftTime = CurTime() + RUST.Recipes[base.selectedCraft].time * base.craftAmount
+        RUST.CraftTimeSum = RUST.Recipes[base.selectedCraft].time * base.craftAmount
 
         netstream.Start("RUST_CraftItem", base.selectedCraft, base.craftAmount)
     end

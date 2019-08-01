@@ -16,6 +16,14 @@ surface.CreateFont("RustHUD", {
 	weight = 550,
 })
 
+surface.CreateFont("RUST_Context_Text", {
+	font = "Arial",
+	extended = false,
+	size = 20,
+	weight = 550,
+	antialias = true,
+})
+
 --[[-------------------------------------------------------------------------
 Disable the old HUD
 ---------------------------------------------------------------------------]]
@@ -103,6 +111,46 @@ function HUD:UNIVERSAL(icon, w, h, var, color, tw, th, typ)
 
 	draw.BackgroundText(var, "RustHUD", w+55, h+10, Color(255,255,255), 1, 1)
 end
+--[[-------------------------------------------------------------------------
+Draws Icon
+---------------------------------------------------------------------------]]
+
+local icon = Material("rust/postprocessing/context_icon.png")
+
+local types = {
+	["rust_item"] = {
+		pos = Vector(0, 0, 10),
+		text = "TAKE"
+	},
+	["rust_crate_weapons"] = {
+		pos = Vector(0, 0, 10),
+		text = "LOOT",
+		noTextOnOccupied = true
+	}
+}
+
+function HUD:CONTEXT_ICON(ply)
+	local tr = ply:GetEyeTrace()
+
+	for k, ent in ipairs(ents.FindByClass("rust_*")) do
+		local drawData = types[ent:GetClass()]
+		local data = ent:LocalToWorld(drawData.pos):ToScreen()
+
+		if( data.visible && ply:GetPos():Distance(ent:GetPos()) < 100 )then
+			surface.SetDrawColor(255, 255, 255, 255)
+			surface.SetMaterial(icon)
+			surface.DrawTexturedRect(data.x - 16, data.y - 16, 32, 32)
+
+			if( tr && tr.Entity == ent)then
+				if( drawData.noTextOnOccupied && IsValid(ent:GetUsedBy()) )then
+					draw.SimpleText("OCCUPIED", "RUST_Context_Text", data.x, data.y + 16 + 12, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				else
+					draw.SimpleText(drawData.text, "RUST_Context_Text", data.x, data.y + 16 + 12, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				end
+			end
+		end
+	end
+end
 
 --[[-------------------------------------------------------------------------
 Do The HUD
@@ -133,6 +181,9 @@ function HUD:DrawTheHUD()
 
 	-- Radiation
 	self:UNIVERSAL(false, w-mw+80, h-mh+10+60, radiation, Color(50,200,50), w-mw+7, h-mh+10+60, "RADS", lfood, 100, "food")
+
+	-- Context icon
+	self:CONTEXT_ICON(ply)
 end
 hook.Add("HUDPaint", "DoTheFuckingHUDDude", function() HUD:DrawTheHUD() end)
 
