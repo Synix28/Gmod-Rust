@@ -5,8 +5,6 @@
 ]]--
 
 RUST.Items = RUST.Items || {}
-RUST.Recipes = RUST.Recipes || {}
-RUST.Categories = RUST.Categories || {}
 RUST.Inventories = RUST.Inventories || {}
 
 // ------------------------------------------------------------------
@@ -21,10 +19,12 @@ RUST.DefaultBodyGroups = {
         {8, 0}
     },
     [RUST_ARMOR_TYPE_CHEST] = {
-        {2, 0}
+        {2, 0},
+        {6, 0}
     },
     [RUST_ARMOR_TYPE_LEGS] = {
-        {3, 2}
+        {3, 0},
+        {7, 0}
     },
     [RUST_ARMOR_TYPE_FEET] = {
         {5, 0}
@@ -145,6 +145,13 @@ RUST.Items["low_quality_metal"] = {
     isResource = true
 }
 
+RUST.Items["wood_planks"] = {
+    name = "Wood Planks",
+    icon = Material("rust/wood_planks_icon.png"),
+    max = 250,
+    isResource = true
+}
+
 ------------------------------------------------------------------------------
 
 RUST.Items["bed"] = {
@@ -168,7 +175,63 @@ RUST.Items["furnace"] = {
     isPlaceable = true
 }
 
+RUST.Items["sleeping_bag"] = {
+    name = "Sleeping Bag",
+    icon = Material("rust/sleeping_bag_icon.png"),
+    max = 1,
+    isPlaceable = true
+}
+
+RUST.Items["small_stash"] = {
+    name = "Small Stash",
+    icon = Material("rust/unknown.png"),
+    max = 8,
+    isPlaceable = true
+}
+
+RUST.Items["wood_storage_box"] = {
+    name = "Wood Storage Box",
+    icon = Material("rust/wood_storage_box_icon.png"),
+    max = 8,
+    isPlaceable = true
+}
+
+RUST.Items["wood_storage_box_large"] = {
+    name = "Wood Storage Box (Large)",
+    icon = Material("rust/wood_storage_box_large_icon.png"),
+    max = 4,
+    isPlaceable = true
+}
+
+RUST.Items["wooden_barricade"] = {
+    name = "Wooden Barricade",
+    icon = Material("rust/wood_barricade_icon.png"),
+    max = 1,
+    isPlaceable = true
+}
+
+RUST.Items["wooden_shelter"] = {
+    name = "Wooden Shelter",
+    icon = Material("rust/wood_shelter_icon.png"),
+    max = 1,
+    isPlaceable = true
+}
+
+RUST.Items["workbench"] = {
+    name = "Workbench",
+    icon = Material("rust/workbench_icon.png"),
+    max = 1,
+    isPlaceable = true
+}
+
 // ------------------------------------------------------------------
+
+RUST.Items["wooden_door"] = {
+    name = "Wooden Door",
+    icon = Material("rust/wooden_door_icon.png"),
+    max = 1,
+    isDoor = true
+}
 
 RUST.Items["metal_door"] = {
     name = "Metal Door",
@@ -188,6 +251,14 @@ RUST.Items["cloth_helmet"] = {
     type = RUST_ARMOR_TYPE_HEAD,
     bodygroups = {
         {8, 1}
+    },
+
+    stats = {
+        bullet = 10,
+        melee = 10,
+        explosion = 5,
+        cold = 5,
+        radiation = 0
     }
 }
 
@@ -199,7 +270,16 @@ RUST.Items["cloth_vest"] = {
     isArmor = true,
     type = RUST_ARMOR_TYPE_CHEST,
     bodygroups = {
-        {2, 2}
+        {2, 2},
+        {6, 2}
+    },
+
+    stats = {
+        bullet = 10,
+        melee = 10,
+        explosion = 5,
+        cold = 10,
+        radiation = 0
     }
 }
 
@@ -211,7 +291,16 @@ RUST.Items["cloth_pants"] = {
     isArmor = true,
     type = RUST_ARMOR_TYPE_LEGS,
     bodygroups = {
-        {3, 2}
+        {3, 2},
+        {7, 2}
+    },
+
+    stats = {
+        bullet = 5,
+        melee = 5,
+        explosion = 5,
+        cold = 5,
+        radiation = 0
     }
 }
 
@@ -224,132 +313,266 @@ RUST.Items["cloth_boots"] = {
     type = RUST_ARMOR_TYPE_FEET,
     bodygroups = {
         {5, 2}
+    },
+
+    stats = {
+        bullet = 8,
+        melee = 8,
+        explosion = 5,
+        cold = 5,
+        radiation = 0
+    }
+}
+
+RUST.Items["leather_helmet"] = {
+    name = "Leather Helmet",
+    icon = Material("rust/helmet_2_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_HEAD,
+    bodygroups = {
+        {8, 5}
+    },
+
+    stats = {
+        bullet = 10,
+        melee = 15,
+        explosion = 10,
+        cold = 15,
+        radiation = 10
+    }
+}
+
+RUST.Items["leather_vest"] = {
+    name = "Leather Vest",
+    icon = Material("rust/vest_2_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_CHEST,
+    bodygroups = {
+        {2, 1},
+        {6, 1}
+    },
+
+    stats = {
+        bullet = 10,
+        melee = 15,
+        explosion = 10,
+        cold = 15,
+        radiation = 10
+    }
+}
+
+RUST.Items["leather_pants"] = {
+    name = "Leather Pants",
+    icon = Material("rust/pants_2_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_LEGS,
+    bodygroups = {
+        {3, 1},
+        {7, 1}
+    },
+
+    stats = {
+        bullet = 10,
+        melee = 10,
+        explosion = 10,
+        cold = 10,
+        radiation = 10
+    }
+}
+
+RUST.Items["leather_boots"] = {
+    name = "Leather Boots",
+    icon = Material("rust/boots_2_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_FEET,
+    bodygroups = {
+        {5, 1}
+    },
+
+    stats = {
+        bullet = 10,
+        melee = 10,
+        explosion = 10,
+        cold = 10,
+        radiation = 10
+    }
+}
+
+RUST.Items["kevlar_helmet"] = {
+    name = "Kevlar Helmet",
+    icon = Material("rust/helmet_3_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_HEAD,
+    bodygroups = {
+        {8, 6}
+    },
+
+    stats = {
+        bullet = 25,
+        melee = 25,
+        explosion = 15,
+        cold = 10,
+        radiation = 20
+    }
+}
+
+RUST.Items["kevlar_vest"] = {
+    name = "Kevlar Vest",
+    icon = Material("rust/vest_3_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_CHEST,
+    bodygroups = {
+        {2, 1},
+        {6, 3}
+    },
+
+    stats = {
+        bullet = 30,
+        melee = 30,
+        explosion = 15,
+        cold = 10,
+        radiation = 30
+    }
+}
+
+RUST.Items["kevlar_pants"] = {
+    name = "Kevlar Pants",
+    icon = Material("rust/pants_3_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_LEGS,
+    bodygroups = {
+        {3, 1},
+        {7, 1}
+    },
+
+    stats = {
+        bullet = 15,
+        melee = 15,
+        explosion = 15,
+        cold = 10,
+        radiation = 15
+    }
+}
+
+RUST.Items["kevlar_boots"] = {
+    name = "Kevlar Boots",
+    icon = Material("rust/boots_3_icon.png"),
+    max = 1,
+
+    isArmor = true,
+    type = RUST_ARMOR_TYPE_FEET,
+    bodygroups = {
+        {5, 1}
+    },
+
+    stats = {
+        bullet = 15,
+        melee = 15,
+        explosion = 15,
+        cold = 10,
+        radiation = 15
     }
 }
 
 // ------------------------------------------------------------------
 
-RUST.Categories["survival"] = {
-    sort = 1,
-    name = "Survival",
-    recipes = {}
+RUST.Items["556_ammo"] = {
+    name = "556 Ammo",
+    icon = Material("rust/556_ammo.png"),
+    max = 250,
+    isAmmo = true
 }
 
-RUST.Categories["resources"] = {
-    sort = 2,
-    name = "Resources",
-    recipes = {}
-}
-
-RUST.Categories["medical_items"] = {
-    sort = 3,
-    name = "Medical",
-    recipes = {}
-}
-
-RUST.Categories["weapons"] = {
-    sort = 4,
-    name = "Weapons",
-    recipes = {}
-}
-
-RUST.Categories["weapon_mods"] = {
-    sort = 5,
-    name = "Weapon Mods",
-    recipes = {}
-}
-
-RUST.Categories["armor"] = {
-    sort = 6,
-    name = "Armor",
-    recipes = {}
-}
-
-RUST.Categories["tools"] = {
-    sort = 7,
-    name = "Tools",
-    recipes = {}
-}
-
-RUST.Categories["parts"] = {
-    sort = 8,
-    name = "Parts",
-    recipes = {}
+RUST.Items["arrow"] = {
+    name = "Arrow",
+    icon = Material("rust/basic_arrow_icon.png"),
+    max = 16,
+    isAmmo = true
 }
 
 // ------------------------------------------------------------------
 
-RUST.Recipes["bed"] = {
-    default = true,
-    workbench = false,
-    time = 10,
-    needed = {
-        ["cloth"] = 40,
-        ["metal_fragments"] = 100
-    }
+RUST.Items["m4"] = {
+    name = "M4",
+    icon = Material("rust/m4_icon.png"),
+    max = 1,
+    ent = "m4_legacy",
+    isWeapon = true
 }
 
-table.insert(RUST.Categories["survival"].recipes, "bed")
-
-RUST.Recipes["campfire"] = {
-    default = true,
-    workbench = false,
-    time = 2,
-    needed = {
-        ["wood"] = 5
-    }
+RUST.Items["mp5a4"] = {
+    name = "MP5A4",
+    icon = Material("rust/mp5_icon.png"),
+    max = 1,
+    ent = "mp5_legacy",
+    isWeapon = true
 }
 
-table.insert(RUST.Categories["survival"].recipes, "campfire")
-
-RUST.Recipes["furnace"] = {
-    default = true,
-    workbench = false,
-    time = 15,
-    needed = {
-        ["stones"] = 15,
-        ["wood"] = 20,
-        ["low_grade_fuel"] = 10,
-        ["bed"] = 20,
-        ["campfire"] = 20,
-    }
+RUST.Items["hunting_bow"] = {
+    name = "Hunting Bow",
+    icon = Material("rust/hunting_bow_icon.png"),
+    max = 1,
+    ent = "rust_bow",
+    isWeapon = true,
+    isBow = true
 }
 
-table.insert(RUST.Categories["survival"].recipes, "furnace")
+// ------------------------------------------------------------------
 
-RUST.Recipes["low_grade_fuel"] = { 
-    default = true,
-    workbench = false,
-    time = 2,
-    needed = {
-        ["animal_fat"] = 2,
-        ["cloth"] = 1
-    }
+RUST.Items["hatchet"] = {
+    name = "Hatchet",
+    icon = Material("rust/hatchet_icon.png"),
+    max = 1,
+    ent = "rust_hatchet",
+    isMelee = true
 }
 
-table.insert(RUST.Categories["survival"].recipes, "low_grade_fuel")
-
-RUST.Recipes["low_quality_metal"] = { 
-    default = true,
-    workbench = false,
-    time = 4,
-    needed = {
-        ["metal_fragments"] = 15
-    }
-} 
-
-table.insert(RUST.Categories["survival"].recipes, "low_quality_metal")
-
-RUST.Recipes["metal_door"] = { 
-    default = true,
-    workbench = false,
-    time = 15,
-    needed = {
-        ["metal_fragments"] = 200
-    }
+RUST.Items["stone_hatchet"] = {
+    name = "Stone Hatchet",
+    icon = Material("rust/rocktool_icon.png"),
+    max = 1,
+    ent = "rust_hatchet",
+    isMelee = true
 }
 
-table.insert(RUST.Categories["survival"].recipes, "metal_door")
+RUST.Items["hands"] = {
+    name = "Hands",
+    icon = Material("rust/rocktool_icon.png"),
+    max = 1,
+    ent = "rust_fists",
+    isMelee = true
+}
+
+RUST.Items["pickaxe"] = {
+    name = "Pickaxe",
+    icon = Material("rust/pickaxe_icon.png"),
+    max = 1,
+    ent = "rust_pickaxe",
+    isMelee = true
+}
+
+// ------------------------------------------------------------------
+
+RUST.Items["cooked_chicken"] = {
+    name = "Cooked Chicken",
+    icon = Material("rust/cooked_chicken_breast_icon.png"),
+    max = 250,
+    isFood = true
+}
 
 // ------------------------------------------------------------------
 

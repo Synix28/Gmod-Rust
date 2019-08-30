@@ -1,6 +1,10 @@
 RUST = RUST || {}
 RUST.VGUI = RUST.VGUI || {}
 
+GM.Version = "Alpha"
+GM.Name = "Rust"
+GM.Author = "Aden"
+
 // PRELOAD
 // HAI!
 DeriveGamemode("sandbox")

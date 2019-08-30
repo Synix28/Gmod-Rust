@@ -24,9 +24,12 @@ function ENT:OnRemove()
     timer.Remove("Remove_Item_" .. self:EntIndex())
 end
 
+function ENT:SetItemData(itemData)
+    self.itemData = itemData
+end
 
 function ENT:Use(caller, activator)
-    if( caller:IsPlayer() && caller:AddItem(caller:GetInv(), self:GetItemID(), self:GetAmount()) )then
+    if( caller:IsPlayer() && caller:AddItem(caller:GetInv(), self:GetItemID(), self:GetAmount(), self.itemData) )then
         self:Remove()
     end
 end

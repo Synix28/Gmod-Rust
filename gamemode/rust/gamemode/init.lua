@@ -1,5 +1,9 @@
 RUST = RUST || {}
 
+GM.Version = "Alpha"
+GM.Name = "Rust"
+GM.Author = "Aden"
+
 // PRELOAD
 
 DeriveGamemode("sandbox")

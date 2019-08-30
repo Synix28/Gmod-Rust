@@ -4,6 +4,11 @@
 
 ]]--
 
+local draw = draw
+local math = math
+local surface = surface
+local vgui = vgui
+local LocalPlayer = LocalPlayer
 
 local PANEL = {}
 

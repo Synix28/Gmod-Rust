@@ -108,7 +108,9 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
 
         // check for armor inv
 
-        if( toSlotInv == ply:GetArmorInv() )then
+        local armorInv = ply:GetArmorInv()
+
+        if( toSlotInv == armorInv )then
             local itemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
             local types = {
                 RUST_ARMOR_TYPE_HEAD,
@@ -121,10 +123,14 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
                 return
             end
 
+            for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
+                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
+            end
+
             for k, bodygroupData in ipairs(itemData.bodygroups) do
                 ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
             end
-        elseif( fromSlotInv == ply:GetArmorInv() && toSlotInvData[toSlotID] )then
+        elseif( fromSlotInv == armorInv && toSlotInvData[toSlotID] )then
             local itemData = RUST.Items[toSlotInvData[toSlotID].itemid]
             local types = {
                 RUST_ARMOR_TYPE_HEAD,
@@ -137,16 +143,79 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
                 return
             end
 
+            for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
+                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
+            end
+
             for k, bodygroupData in ipairs(itemData.bodygroups) do
                 ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
             end
-        elseif( fromSlotInv == ply:GetArmorInv() && !toSlotInvData[toSlotID] )then
+        elseif( fromSlotInv == armorInv && !toSlotInvData[toSlotID] )then
             local itemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
 
             for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
                 ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
             end
         end
+
+        // check hotbar
+
+        local hotbarInv = ply:GetHotbarInv()
+
+        if( fromSlotInv == hotbarInv && fromSlotID == ply.CurrentSelectedSlot )then
+            local fromSlotItemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
+
+            if( toSlotInvData[toSlotID] )then
+                local toSlotItemData = RUST.Items[toSlotInvData[toSlotID].itemid]
+
+                if( fromSlotItemData.isWeapon && ply.CantSwitchSlot )then
+                    return
+                end
+
+                if( toSlotItemData.isWeapon || toSlotItemData.isMelee )then
+                    ply:StripWeapons()
+                    ply:Give(toSlotItemData.ent, true)
+
+                    if( toSlotItemData.isWeapon )then
+                        ply:GetActiveWeapon():SetClip1(toSlotInvData[toSlotID].itemData.clip)
+                    end
+                else
+                    ply:StripWeapons()
+                    ply.CurrentSelectedSlot = nil
+                end
+            else
+                if( fromSlotItemData.isWeapon && ply.CantSwitchSlot )then
+                    return
+                end
+
+                ply:StripWeapons()
+                ply.CurrentSelectedSlot = nil
+            end
+        end
+
+        if( toSlotInv == hotbarInv && toSlotID == ply.CurrentSelectedSlot )then
+            local fromSlotItemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
+
+            if( fromSlotItemData.isWeapon && ply.CantSwitchSlot || toSlotInvData[toSlotID] && RUST.Items[toSlotInvData[toSlotID].itemid].isWeapon && ply.CantSwitchSlot )then
+                return
+            end
+
+            if( fromSlotItemData.isWeapon || fromSlotItemData.isMelee )then
+                ply:StripWeapons()
+                ply:Give(fromSlotItemData.ent, true)
+
+                if( fromSlotItemData.isWeapon )then
+                    ply:GetActiveWeapon():SetClip1(fromSlotInvData[fromSlotID].itemData.clip)
+                end
+            else
+                print("ff")
+
+                ply:StripWeapons()
+                ply.CurrentSelectedSlot = nil
+            end
+        end
+
+        // do move stuff
 
         if( toSlotInvData[toSlotID] )then
             if( fromSlotInvData[fromSlotID].itemid == toSlotInvData[toSlotID].itemid )then
@@ -222,13 +291,29 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
         ent:SetPos( ply:EyePos() + ply:GetAimVector() * 50 )
             ent:SetItemID(invData[slot].itemid)
             ent:SetAmount(invData[slot].amount)
+
+            if( invData[slot].itemData )then
+                ent:SetItemData(invData[slot].itemData)
+            end
+            
         ent:Spawn()
 
-        if( inv == ply:GetArmorInv() )then
+        local armorInv = ply:GetArmorInv()
+
+        if( inv == armorInv )then
             local itemData = RUST.Items[invData[slot].itemid]
 
             for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
                 ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
+            end
+        end
+
+        local hotbarInv = ply:GetHotbarInv()
+
+        if( inv == hotbarInv )then
+            if( slot == ply.CurrentSelectedSlot )then
+                ply:StripWeapons()
+                ply.CurrentSelectedSlot = nil
             end
         end
 
@@ -238,6 +323,26 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
     print("-------------------------------------------------------------")
     PrintTable(RUST.Inventories[inv])
     print("-------------------------------------------------------------")
+end)
+
+netstream.Hook("RUST_Eat", function(ply, inv, slot)
+    if( ( ply.EatCoolDown || -1 ) > CurTime() )then return end
+
+    local invData = RUST.Inventories[inv].slots
+
+    if( invData[slot] )then
+        local itemData = RUST.Items[invData[slot].itemid]
+
+        if( itemData.isFood )then
+            if( ( invData[slot].amount - 1 ) == 0 )then
+                invData[slot] = false
+            else
+                invData[slot].amount = invData[slot].amount - 1
+            end
+
+            ply.EatCoolDown = CurTime() + 2
+        end
+    end
 end)
 
 netstream.Hook("RUST_InventoryClosed", function(ply)

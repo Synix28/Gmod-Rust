@@ -4,6 +4,12 @@
 
 ]]--
 
+local draw = draw
+local math = math
+local surface = surface
+local vgui = vgui
+local LocalPlayer = LocalPlayer
+
 surface.CreateFont( "RUST_Title", {
 	font = "Arial",
 	extended = false,

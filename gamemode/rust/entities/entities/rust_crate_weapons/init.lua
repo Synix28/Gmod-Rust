@@ -20,38 +20,61 @@ function ENT:Initialize()
         slots = {}
     }
 
-    for i = 1, 6 do
+    for i = 1, 9 do
         RUST.Inventories[self.inv].slots[i] = false
     end
 
     RUST.Inventories[self.inv].slots[1] = {
-        itemid = "wood",
-        amount = 200
-    }
-
-    RUST.Inventories[self.inv].slots[2] = {
-        itemid = "stones",
-        amount = 200
-    }
-
-    RUST.Inventories[self.inv].slots[3] = {
-        itemid = "cloth_helmet",
+        itemid = "hatchet",
         amount = 1
     }
 
+    RUST.Inventories[self.inv].slots[2] = {
+        itemid = "hunting_bow",
+        amount = 1
+    }
+
+    RUST.Inventories[self.inv].slots[3] = {
+        itemid = "cooked_chicken",
+        amount = 100
+    }
+
     RUST.Inventories[self.inv].slots[4] = {
-        itemid = "cloth_vest",
+        itemid = "kevlar_vest",
         amount = 1
     }
 
     RUST.Inventories[self.inv].slots[5] = {
-        itemid = "cloth_pants",
+        itemid = "kevlar_pants",
         amount = 1
     }
 
     RUST.Inventories[self.inv].slots[6] = {
-        itemid = "cloth_boots",
+        itemid = "kevlar_boots",
         amount = 1
+    }
+
+    RUST.Inventories[self.inv].slots[7] = {
+        itemid = "mp5a4",
+        amount = 1,
+        itemData = {
+            clip = 20,
+            attachments = {}
+        }
+    }
+
+    RUST.Inventories[self.inv].slots[8] = {
+        itemid = "m4",
+        amount = 1,
+        itemData = {
+            clip = 20,
+            attachments = {}
+        }
+    }
+
+    RUST.Inventories[self.inv].slots[9] = {
+        itemid = "556_ammo",
+        amount = 200
     }
 end
 
