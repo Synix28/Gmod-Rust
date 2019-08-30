@@ -28,8 +28,11 @@ surface.CreateFont("RUST_Context_Text", {
 Disable the old HUD
 ---------------------------------------------------------------------------]]
 HUD.Dont = {
-CHudHealth = true,
-CHudBattery = true,
+	CHudHealth = true,
+	CHudBattery = true,
+	CHudWeaponSelection = true,
+	CHudAmmo = true,
+	CHudSecondaryAmmo = true
 }
 hook.Add("HUDShouldDraw", "WegMitDemMüll", function(name)
 	if HUD.Dont[name] then return false end
@@ -134,6 +137,9 @@ function HUD:CONTEXT_ICON(ply)
 
 	for k, ent in ipairs(ents.FindByClass("rust_*")) do
 		local drawData = types[ent:GetClass()]
+
+		if( !drawData )then continue end
+
 		local data = ent:LocalToWorld(drawData.pos):ToScreen()
 
 		if( data.visible && ply:GetPos():Distance(ent:GetPos()) < 100 )then

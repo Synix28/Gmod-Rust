@@ -6,7 +6,7 @@
 
 local PLAYER = FindMetaTable("Player")
 
-function PLAYER:AddItem(inv, itemid, amount)
+function PLAYER:AddItem(inv, itemid, amount, itemData)
     local invData = RUST.Inventories[inv].slots
     local freeSlots = RUST.HasSpaceForAmount(inv, itemid, amount)
 
@@ -29,7 +29,17 @@ function PLAYER:AddItem(inv, itemid, amount)
                     remainingAmount = 0
                 end
 
-                netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                if( itemData )then
+                    invData[slot].itemData = itemData
+                end
+
+                if( itemData )then
+                    invData[slot].itemData = itemData
+
+                    netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount, invData[slot].itemData)
+                else
+                    netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                end
             end
 
             if( !data )then
@@ -44,7 +54,13 @@ function PLAYER:AddItem(inv, itemid, amount)
                     remainingAmount = 0
                 end
 
-                netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                if( itemData )then
+                    invData[slot].itemData = itemData
+
+                    netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount, invData[slot].itemData)
+                else
+                    netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                end
             end
 
             if( remainingAmount <= 0 )then

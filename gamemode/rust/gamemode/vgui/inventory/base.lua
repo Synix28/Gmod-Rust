@@ -4,6 +4,12 @@
 
 ]]--
 
+local draw = draw
+local math = math
+local surface = surface
+local vgui = vgui
+local LocalPlayer = LocalPlayer
+
 local PANEL = {}
 
 function PANEL:Init()
@@ -21,6 +27,32 @@ function PANEL:Init()
     if( RUST.VGUI.Hotbar && IsValid(RUST.VGUI.Hotbar) )then
         RUST.VGUI.Hotbar:SetParent(self)
     end
+
+    local w, h = self:GetWide(), self:GetTall()
+
+    self.armorButton = vgui.Create("RUST_TabButton", self)
+    self.armorButton:SetPos(w / 2 - 50 - 55, 5)
+    self.armorButton:SetTabText("Armor")
+    self.armorButton:SetTabFunc(function(parent)
+        if( IsValid(parent.armor) )then
+            parent.armor:Remove()
+            parent.armor = nil
+        else
+            parent:OpenArmor()
+        end
+    end)
+
+    self.craftingButton = vgui.Create("RUST_TabButton", self)
+    self.craftingButton:SetPos(w / 2 - 50 + 55, 5)
+    self.craftingButton:SetTabText("Crafting")
+    self.craftingButton:SetTabFunc(function(parent)
+        if( IsValid(parent.crafting) )then
+            parent.crafting:Remove()
+            parent.crafting = nil
+        else
+            parent:OpenCrafting()
+        end
+    end)
 end
 
 function PANEL:OpenArmor()
@@ -52,9 +84,51 @@ function PANEL:OnKeyCodePressed(key)
         RUST.VGUI.BasePanel:Remove()
         
         timer.Simple(0.2, function()
+            if( IsValid(RUST.VGUI.BasePanel) )then return end
+
             RUST.VGUI.BasePanel = nil
         end)
     end
 end
 
 vgui.Register("RUST_Base", PANEL, "DPanel")
+
+// ------------------------------------------------------------------
+
+local PANEL = {}
+
+function PANEL:Init()
+    self:SetSize(100, 20)
+    self:SetText("")
+end
+
+function PANEL:SetTabText(text)
+    self.text = text
+end
+
+function PANEL:SetTabFunc(func)
+    self.func = func
+end
+
+function PANEL:Paint(w, h)
+    if( !self.text )then return end
+
+    surface.SetDrawColor(0, 0, 0, 255)
+    surface.DrawRect(0, 0, w, h)
+
+    if( self:IsHovered() )then
+        surface.SetDrawColor(100, 100, 100, 255)
+        surface.DrawRect(1, 1, w - 2, h - 2)
+    else
+        surface.SetDrawColor(80, 80, 80, 255)
+        surface.DrawRect(1, 1, w - 2, h - 2)
+    end
+
+    draw.SimpleText(self.text, "RUST_Craft_Button_Text", w / 2, h / 2, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+end
+
+function PANEL:DoClick()
+    self.func(self:GetParent())
+end
+
+vgui.Register("RUST_TabButton", PANEL, "DButton")

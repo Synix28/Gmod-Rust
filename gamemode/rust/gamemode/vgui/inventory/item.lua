@@ -4,10 +4,40 @@
 
 ]]--
 
+local draw = draw
+local math = math
+local surface = surface
+local vgui = vgui
+local LocalPlayer = LocalPlayer
+
 surface.CreateFont( "Rust_Item_Amount", {
 	font = "Arial",
 	extended = false,
 	size = 14,
+	weight = 500,
+	antialias = true,
+} )
+
+surface.CreateFont( "Rust_Tooltip_Title", {
+	font = "Arial",
+	extended = false,
+	size = 18,
+	weight = 550,
+	antialias = true,
+} )
+
+surface.CreateFont( "Rust_Tooltip_Desc", {
+	font = "Arial",
+	extended = false,
+	size = 14,
+	weight = 800,
+	antialias = true,
+} )
+
+surface.CreateFont( "Rust_Tooltip_Desc_Text", {
+	font = "Arial",
+	extended = false,
+	size = 12,
 	weight = 500,
 	antialias = true,
 } )
@@ -26,8 +56,39 @@ function PANEL:Paint(w, h)
     surface.SetMaterial(RUST.Items[self.itemid].icon)
     surface.DrawTexturedRect(3, 3, 64, 64)
 
-    if( RUST.Items[self.itemid].isResource )then
+    if( RUST.Items[self.itemid].isResource || RUST.Items[self.itemid].isAmmo || RUST.Items[self.itemid].isFood )then
         draw.SimpleText("x" .. self.amount, "Rust_Item_Amount", w, h - 7, Color(255, 255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+    end
+
+    if( RUST.Items[self.itemid].isWeapon )then
+        local slot = self:GetParent()
+
+        if( slot )then
+            local slotData = RUST.Inventories[slot.inv].slots[slot.id]
+
+            if( slotData && slotData.itemData )then
+                draw.SimpleText(slotData.itemData.clip, "Rust_Item_Amount", w, h - 7, Color(255, 165, 0, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+            end
+        end
+    end
+
+    if( self:IsHovered() && ( !self.tooltip || !IsValid(self.tooltip) ) )then
+        self.tooltip = vgui.Create("RUST_Tooltip")
+        self.tooltip:SetPos(gui.MouseX() + 30, gui.MouseY())
+        self.tooltip:SetItemID(self.itemid)
+        self.tooltip:SetAmount(self.amount)
+        self.tooltip:MakePopup()
+        self.tooltip:MoveToFront()
+    elseif( self:IsHovered() && self.tooltip && IsValid(self.tooltip) )then
+        self.tooltip:SetPos(gui.MouseX() + 30, gui.MouseY())
+        self.tooltip:MoveToFront()
+    elseif( !self:IsHovered() && self.tooltip && IsValid(self.tooltip) )then
+        self.tooltip:Remove()
+        self.tooltip = nil
+    end
+
+    if( self.menu && IsValid(self.menu) )then
+        self.menu:MoveToFront()
     end
 end
 
@@ -42,6 +103,10 @@ end
 function PANEL:OnRemove()
     if( self.menu && IsValid(self.menu) )then
         self.menu:Remove()
+    end
+
+    if( self.tooltip && IsValid(self.tooltip) )then
+        self.tooltip:Remove()
     end
 end
 
@@ -58,10 +123,21 @@ end
 function PANEL:OpenOptions()
     local itemData = RUST.Items[self.itemid]
 
-    if( itemData.isResource )then
+    if( itemData.isResource || itemData.isAmmo )then
         self.menu = DermaMenu()
         self.menu:AddOption( "Split", function() 
             RUST.Split(self:GetParent())
+        end )
+
+        self.menu:AddOption( "Drop", function() 
+            RUST.DropItem(self:GetParent())
+        end )
+
+        self.menu:Open()
+    elseif( itemData.isFood )then
+        self.menu = DermaMenu()
+        self.menu:AddOption( "Eat", function() 
+            RUST.Eat(self:GetParent())
         end )
 
         self.menu:AddOption( "Drop", function() 
@@ -115,3 +191,50 @@ hook.Add( "DrawOverlay", "DragNDropPaint", function()
 
 	DisableClipping( false )
 end )
+
+// ------------------------------------------------------------------
+
+local PANEL = {}
+
+function PANEL:Init()
+    self:SetSize(205, 125)
+end
+
+function PANEL:SetItemID(itemid)
+    self.itemid = itemid
+end
+
+function PANEL:SetAmount(amount)
+    self.amount = amount
+end
+
+function PANEL:Paint(w, h)
+    if( !self.itemid || !self.amount )then return end
+
+    local itemData = RUST.Items[self.itemid]
+
+    surface.SetDrawColor(25, 25, 25, 255)
+    surface.DrawRect(0, 0, w, h)
+
+    surface.SetDrawColor(255, 255, 255, 255)
+    surface.SetMaterial(itemData.icon)
+    surface.DrawTexturedRect(5, 5, 64, 64)
+
+    draw.SimpleText(itemData.name, "Rust_Tooltip_Title", 76.5 + ( 124 / 2 ), 5 + 32, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    draw.SimpleText("Description:", "Rust_Tooltip_Desc", 10, 84, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+
+    draw.SimpleText("Epic Beschreibung!", "Rust_Tooltip_Desc_Text", 10, 105, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+end
+
+function PANEL:OnKeyCodePressed(key)
+    if( key == KEY_TAB )then
+        self:Remove()
+        RUST.VGUI.BasePanel:Remove()
+        
+        timer.Simple(0.2, function()
+            RUST.VGUI.BasePanel = nil
+        end)
+    end
+end
+
+vgui.Register("RUST_Tooltip", PANEL, "DPanel")
