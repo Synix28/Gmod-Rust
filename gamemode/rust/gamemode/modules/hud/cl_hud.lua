@@ -42,8 +42,8 @@ end)
 Draw Background Text + Text
 ---------------------------------------------------------------------------]]
 function draw.BackgroundText(text, font, w, h, color, ww, hh)
-	if not ww then ww = false end
-	if not hh then hh = false end
+	if !ww then ww = false end
+	if !hh then hh = false end
 	draw.SimpleText(text, font, w+1, h+1, Color(0,0,0), ww, hh)
 	draw.SimpleText(text, font, w, h, color, ww, hh)
 end
@@ -56,7 +56,7 @@ function HUD:FormatBar(bar, val, max)
 	if endbar > bar then
 		return bar
 	else
-		return endbar 
+		return endbar
 	end
 end
 
@@ -75,6 +75,7 @@ local function LocalPlayerTimer()
 		end)
 	end
 end
+
 LocalPlayerTimer()
 
 function HUD:HP(icon, w, h, var, color, tw, th, typ)
@@ -109,9 +110,6 @@ Draws Universal
 ---------------------------------------------------------------------------]]
 function HUD:UNIVERSAL(icon, w, h, var, color, tw, th, typ)
 	draw.BackgroundText(typ, "RustHUD", tw, th, Color(255,255,255))
-
-	local form = self:FormatBar(107, var, LocalPlayer():GetMaxHealth())
-
 	draw.BackgroundText(var, "RustHUD", w+55, h+10, Color(255,255,255), 1, 1)
 end
 --[[-------------------------------------------------------------------------
@@ -164,7 +162,6 @@ Do The HUD
 function HUD:DrawTheHUD()
 	-- Colors
 	local grey = Color(45,45,45)
-	local grey2 = Color(30,30,30)
 
 	-- Resolution things
 	local w, h = ScrW(), ScrH()
