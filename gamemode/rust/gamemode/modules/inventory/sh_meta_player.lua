@@ -51,6 +51,6 @@ function PLAYER:GetArmorStatsSum()
             end
         end
     end
-    
+
     return stats
 end
