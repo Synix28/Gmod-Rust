@@ -2,11 +2,9 @@
 
     Crafting - SV
 
-]]-- RUST_CraftItem
+]]--
 
 netstream.Hook("RUST_CraftItem", function(ply, itemid, craftAmount) // Item craften
-    local invData = RUST.Inventories[ply:GetInv()].slots
-
     if( timer.Exists("Player_Crafting_" .. ply:SteamID()) )then return end
     if( !RUST.HasSpaceForAmount(ply:GetInv(), itemid, craftAmount) )then return end
 
@@ -23,17 +21,17 @@ netstream.Hook("RUST_CraftItem", function(ply, itemid, craftAmount) // Item craf
     if( hasEnough )then
         timer.Create("Player_Crafting_" .. ply:SteamID(), RUST.Recipes[itemid].time * craftAmount, 1, function()
             if( ply && IsValid(ply) )then
-                local hasEnough = true
+                local _hasEnough = true
 
                 for item, amount in pairs(RUST.Recipes[itemid].needed) do
                     local hasAmount = RUST.GetItemAmountFromInv(ply:GetInv(), item)
 
                     if( !hasAmount || hasAmount < craftAmount )then
-                        hasEnough = false
+                        _hasEnough = false
                     end
                 end
 
-                if( !hasEnough )then return end
+                if( !_hasEnough )then return end
                 if( !RUST.HasSpaceForAmount(ply:GetInv(), itemid, craftAmount) )then return end
 
                 for item, amount in pairs(RUST.Recipes[itemid].needed) do
