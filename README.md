@@ -3,7 +3,7 @@ A Garry's Mod Rust Gamemode ( WIP )
 
 Workshop Collection: https://steamcommunity.com/sharedfiles/filedetails/?id=1188858871
 
-# Requirments
+# Requirements
 * Workshop Collection
 * MYSQL Database ( edit libraries/sv_mysql.lua )
 
