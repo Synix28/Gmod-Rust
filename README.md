@@ -7,7 +7,7 @@ Workshop Collection: https://steamcommunity.com/sharedfiles/filedetails/?id=1188
 * Workshop Collection
 * MYSQL Database ( edit libraries/sv_mysql.lua )
 
-# You want to improve the code?
+# Wanna help?
 Make Pull requests or add me on discord:
 
 Aden#3653
