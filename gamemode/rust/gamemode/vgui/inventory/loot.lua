@@ -13,9 +13,6 @@ local LocalPlayer = LocalPlayer
 local PANEL = {}
 
 function PANEL:Init()
-    self.craftAmount = 1 // wie viele gecraftet werden sollen
-    self.selectedCraft = nil // ausgewähltes Blueprint
-
     self:SetSize(270, 435)
     self:SetPos(ScrW() / 2 + (490 / 2) + 5, ScrH() / 2 - (435 / 2))
 end
