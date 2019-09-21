@@ -125,22 +125,22 @@ function PANEL:OpenOptions()
 
     if( itemData.isResource || itemData.isAmmo )then
         self.menu = DermaMenu()
-        self.menu:AddOption( "Split", function() 
+        self.menu:AddOption( "Split", function()
             RUST.Split(self:GetParent())
         end )
 
-        self.menu:AddOption( "Drop", function() 
+        self.menu:AddOption( "Drop", function()
             RUST.DropItem(self:GetParent())
         end )
 
         self.menu:Open()
     elseif( itemData.isFood )then
         self.menu = DermaMenu()
-        self.menu:AddOption( "Eat", function() 
+        self.menu:AddOption( "Eat", function()
             RUST.Eat(self:GetParent())
         end )
 
-        self.menu:AddOption( "Drop", function() 
+        self.menu:AddOption( "Drop", function()
             RUST.DropItem(self:GetParent())
         end )
 
@@ -230,7 +230,7 @@ function PANEL:OnKeyCodePressed(key)
     if( key == KEY_TAB )then
         self:Remove()
         RUST.VGUI.BasePanel:Remove()
-        
+
         timer.Simple(0.2, function()
             RUST.VGUI.BasePanel = nil
         end)
