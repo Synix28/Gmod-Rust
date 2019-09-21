@@ -83,7 +83,7 @@ function PLAYER:RemoveItem(inv, itemid, amount)
             if( data && data.itemid == itemid )then
                 if( data.amount <= amount )then
                     local amountToRemove = data.amount
-                    
+
                     invData[slot] = false
                     amount = amount - amountToRemove
                 else
