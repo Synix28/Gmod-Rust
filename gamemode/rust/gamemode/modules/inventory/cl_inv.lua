@@ -18,7 +18,6 @@ netstream.Hook("RUST_OpenInventory", function()
 end)
 
 netstream.Hook("RUST_SyncInventory", function(inv, data) // Volle Synchronisation eines Inventars.
-    local ply = LocalPlayer()
     RUST.Inventories[inv] = data
 end)
 
@@ -268,10 +267,8 @@ function RUST.DropItem(slot) // Item droppen
 
         local hotbarInv = ply:GetHotbarInv()
 
-        if( slot.inv == hotbarInv )then
-            if( slot.id == ply.CurrentSelectedSlot )then
-                ply.CurrentSelectedSlot = nil
-            end
+        if( slot.inv == hotbarInv && slot.id == ply.CurrentSelectedSlot )then
+            ply.CurrentSelectedSlot = nil
         end
 
         netstream.Start("RUST_Drop", slot.inv, slot.id)
