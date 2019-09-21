@@ -67,7 +67,7 @@ hook.Add("PlayerInitialSpawn", "RUST_SetupInventory", function(ply) // Inventare
             if( !ply || !IsValid(ply) ) then return end
 
             local armorInv = "Player_Armor_" .. ply:SteamID()
-            
+
             for i = 1, 4 do
                 RUST.Inventories[armorInv].slots[i] = false
             end
@@ -92,9 +92,9 @@ end)
 
 netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID, toSlotInv) // Item bewegen SV
     if( !RUST.Inventories[fromSlotInv] || !RUST.Inventories[toSlotInv] )then return end
-    
-    local fromSlotOwner = RUST.Inventories[fromSlotInv].owner
-    local toSlotOwner = RUST.Inventories[toSlotInv].owner
+
+    //local fromSlotOwner = RUST.Inventories[fromSlotInv].owner
+    //local toSlotOwner = RUST.Inventories[toSlotInv].owner
 
     if( // CHECK OWNERSHIP OF THE INVS
        // fromSlotOwner && fromSlotOwner:IsPlayer() && fromSlotOwner == ply && toSlotOwner == ply 
@@ -295,7 +295,7 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
             if( invData[slot].itemData )then
                 ent:SetItemData(invData[slot].itemData)
             end
-            
+
         ent:Spawn()
 
         local armorInv = ply:GetArmorInv()
@@ -310,11 +310,9 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
 
         local hotbarInv = ply:GetHotbarInv()
 
-        if( inv == hotbarInv )then
-            if( slot == ply.CurrentSelectedSlot )then
-                ply:StripWeapons()
-                ply.CurrentSelectedSlot = nil
-            end
+        if( inv == hotbarInv && slot == ply.CurrentSelectedSlot )then
+            ply:StripWeapons()
+            ply.CurrentSelectedSlot = nil
         end
 
         invData[slot] = false
@@ -347,16 +345,28 @@ end)
 
 netstream.Hook("RUST_InventoryClosed", function(ply)
     hook.Run("RUST_InventoryClosed", ply)
-end) 
+end)
+
+netstream.Hook("RUST_LootClosed", function(ply)
+    hook.Run("RUST_LootClosed", ply)
+end)
 
 // ------------------------------------------------------------------
 
-hook.Add("RUST_InventoryClosed", "RUST_Looting", function(ply)
+function RUST.CheckLooting(ply)
     if( ply.Looting && IsValid(ply.Looting) )then
         ply.Looting:SetUsedBy(nil)
 
         ply.Looting:CheckInv()
-        
+
         ply.Looting = nil
     end
+end
+
+hook.Add("RUST_InventoryClosed", "RUST_Looting", function(ply)
+    RUST.CheckLooting(ply)
+end)
+
+hook.Add("RUST_LootClosed", "RUST_Looting", function(ply)
+    RUST.CheckLooting(ply)
 end)

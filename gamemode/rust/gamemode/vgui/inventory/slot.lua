@@ -14,7 +14,7 @@ local PANEL = {}
 
 function PANEL:Init()
     self:SetSize(70, 70)
-    self:Receiver("RUST_Slot", function( receiver, panels, isDropped, menuIndex, mouseX, mouseY ) 
+    self:Receiver("RUST_Slot", function( receiver, panels, isDropped, menuIndex, mouseX, mouseY )
         if( isDropped )then
             RUST.MoveItem(panels[1]:GetParent(), self)
         end

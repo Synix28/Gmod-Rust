@@ -16,7 +16,7 @@ function PANEL:Init()
     self:SetSize(ScrW(), ScrH())
     self:MakePopup()
 
-    self:Receiver("RUST_Slot", function( receiver, panels, isDropped, menuIndex, mouseX, mouseY ) 
+    self:Receiver("RUST_Slot", function( receiver, panels, isDropped, menuIndex, mouseX, mouseY )
         if( isDropped )then
             RUST.DropItem(panels[1]:GetParent())
         end
@@ -28,7 +28,7 @@ function PANEL:Init()
         RUST.VGUI.Hotbar:SetParent(self)
     end
 
-    local w, h = self:GetWide(), self:GetTall()
+    local w, _ = self:GetWide(), self:GetTall()
 
     self.armorButton = vgui.Create("RUST_TabButton", self)
     self.armorButton:SetPos(w / 2 - 50 - 55, 5)
@@ -60,6 +60,12 @@ function PANEL:OpenArmor()
 end
 
 function PANEL:OpenCrafting()
+    if( IsValid(self.loot) )then
+        self.loot:Remove()
+
+        netstream.Start("RUST_LootClosed")
+    end
+
     self.crafting = vgui.Create("RUST_Crafting", self)
 end
 
@@ -82,7 +88,7 @@ end
 function PANEL:OnKeyCodePressed(key)
     if( key == KEY_TAB )then
         RUST.VGUI.BasePanel:Remove()
-        
+
         timer.Simple(0.2, function()
             if( IsValid(RUST.VGUI.BasePanel) )then return end
 

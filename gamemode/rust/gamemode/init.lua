@@ -21,7 +21,7 @@ include("libraries/sh_netstream2.lua")
 include("libraries/sv_mysql.lua")
 
 local fol = GM.FolderName .. "/gamemode/config/"
-local files, folders = file.Find(fol .. "*", "LUA")
+local _, folders = file.Find(fol .. "*", "LUA")
 
 for _, folder in SortedPairs(folders, true) do
     for _, File in SortedPairs(file.Find(fol .. folder .. "/sh_*.lua", "LUA"), true) do
@@ -39,7 +39,7 @@ for _, folder in SortedPairs(folders, true) do
 end
 
 fol = GM.FolderName .. "/gamemode/modules/"
-files, folders = file.Find(fol .. "*", "LUA")
+_, folders = file.Find(fol .. "*", "LUA")
 
 for _, folder in SortedPairs(folders, true) do
     for _, File in SortedPairs(file.Find(fol .. folder .. "/sh_*.lua", "LUA"), true) do
@@ -57,7 +57,7 @@ for _, folder in SortedPairs(folders, true) do
 end
 
 fol = GM.FolderName .. "/gamemode/vgui/"
-files, folders = file.Find(fol .. "*", "LUA")
+_, folders = file.Find(fol .. "*", "LUA")
 
 for _, folder in SortedPairs(folders, true) do
     for _, File in SortedPairs(file.Find(fol .. folder .. "/*.lua", "LUA"), true) do

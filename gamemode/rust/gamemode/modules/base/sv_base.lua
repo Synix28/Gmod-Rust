@@ -30,5 +30,5 @@ function GM:PlayerSetHandsModel( ply, ent )
 end
 
 function GM:GetFallDamage(ply, speed)
-	return (speed / 16)
+	return speed / 16
 end

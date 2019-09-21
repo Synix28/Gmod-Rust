@@ -95,7 +95,7 @@ RUST.Recipes["furnace"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "furnace")
 
-RUST.Recipes["low_grade_fuel"] = { 
+RUST.Recipes["low_grade_fuel"] = {
     default = true,
     workbench = false,
     time = 2,
@@ -107,18 +107,18 @@ RUST.Recipes["low_grade_fuel"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "low_grade_fuel")
 
-RUST.Recipes["low_quality_metal"] = { 
+RUST.Recipes["low_quality_metal"] = {
     default = true,
     workbench = false,
     time = 4,
     needed = {
         ["metal_fragments"] = 15
     }
-} 
+}
 
 table.insert(RUST.Categories["survival"].recipes, "low_quality_metal")
 
-RUST.Recipes["metal_door"] = { 
+RUST.Recipes["metal_door"] = {
     default = true,
     workbench = false,
     time = 15,
@@ -129,7 +129,7 @@ RUST.Recipes["metal_door"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "metal_door")
 
-RUST.Recipes["sleeping_bag"] = { 
+RUST.Recipes["sleeping_bag"] = {
     default = true,
     workbench = false,
     time = 15,
@@ -140,7 +140,7 @@ RUST.Recipes["sleeping_bag"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "sleeping_bag")
 
-RUST.Recipes["small_stash"] = { 
+RUST.Recipes["small_stash"] = {
     default = true,
     workbench = false,
     time = 10,
@@ -151,7 +151,7 @@ RUST.Recipes["small_stash"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "small_stash")
 
-RUST.Recipes["stone_hatchet"] = { 
+RUST.Recipes["stone_hatchet"] = {
     default = true,
     workbench = false,
     time = 20,
@@ -163,7 +163,7 @@ RUST.Recipes["stone_hatchet"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "stone_hatchet")
 
-RUST.Recipes["wood_storage_box"] = { 
+RUST.Recipes["wood_storage_box"] = {
     default = true,
     workbench = false,
     time = 10,
@@ -174,7 +174,7 @@ RUST.Recipes["wood_storage_box"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "wood_storage_box")
 
-RUST.Recipes["wood_storage_box_large"] = { 
+RUST.Recipes["wood_storage_box_large"] = {
     default = true,
     workbench = false,
     time = 20,
@@ -185,7 +185,7 @@ RUST.Recipes["wood_storage_box_large"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "wood_storage_box_large")
 
-RUST.Recipes["wooden_barricade"] = { 
+RUST.Recipes["wooden_barricade"] = {
     default = true,
     workbench = false,
     time = 15,
@@ -196,7 +196,7 @@ RUST.Recipes["wooden_barricade"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "wooden_barricade")
 
-RUST.Recipes["wooden_door"] = { 
+RUST.Recipes["wooden_door"] = {
     default = true,
     workbench = false,
     time = 25,
@@ -207,7 +207,7 @@ RUST.Recipes["wooden_door"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "wooden_door")
 
-RUST.Recipes["wooden_shelter"] = { 
+RUST.Recipes["wooden_shelter"] = {
     default = true,
     workbench = false,
     time = 40,
@@ -218,7 +218,7 @@ RUST.Recipes["wooden_shelter"] = {
 
 table.insert(RUST.Categories["survival"].recipes, "wooden_shelter")
 
-RUST.Recipes["workbench"] = { 
+RUST.Recipes["workbench"] = {
     default = true,
     workbench = false,
     time = 40,
@@ -232,7 +232,7 @@ table.insert(RUST.Categories["survival"].recipes, "workbench")
 
 // ------------------------------------------------------------------
 
-RUST.Recipes["gunpowder"] = { 
+RUST.Recipes["gunpowder"] = {
     default = true,
     workbench = false,
     time = 40,
@@ -244,7 +244,7 @@ RUST.Recipes["gunpowder"] = {
 
 table.insert(RUST.Categories["resource"].recipes, "gunpowder")
 
-RUST.Recipes["wood_planks"] = { 
+RUST.Recipes["wood_planks"] = {
     default = true,
     workbench = false,
     time = 40,

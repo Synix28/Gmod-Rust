@@ -20,7 +20,7 @@ function ENT:Initialize()
         slots = {}
     }
 
-    for i = 1, 9 do
+    for i = 1, 10 do
         RUST.Inventories[self.inv].slots[i] = false
     end
 
@@ -75,6 +75,11 @@ function ENT:Initialize()
     RUST.Inventories[self.inv].slots[9] = {
         itemid = "556_ammo",
         amount = 200
+    }
+
+    RUST.Inventories[self.inv].slots[10] = {
+        itemid = "arrow",
+        amount = 16
     }
 end
 
