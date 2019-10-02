@@ -5,7 +5,7 @@
 ]]--
 
 function GM:ScalePlayerDamage( ply, hitgroup, dmginfo )
-    local statsData = GetArmorStatsSum()
+    local statsData = ply:GetArmorStatsSum()
     local dmgScale = 1
     local wep = dmginfo:GetAttacker():GetActiveWeapon()
 

@@ -20,23 +20,23 @@ function ENT:Initialize()
         slots = {}
     }
 
-    for i = 1, 10 do
+    for i = 1, 20 do
         RUST.Inventories[self.inv].slots[i] = false
     end
 
     RUST.Inventories[self.inv].slots[1] = {
-        itemid = "hatchet",
-        amount = 1
-    }
-
-    RUST.Inventories[self.inv].slots[2] = {
         itemid = "hunting_bow",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[3] = {
+    RUST.Inventories[self.inv].slots[2] = {
         itemid = "cooked_chicken",
         amount = 100
+    }
+
+    RUST.Inventories[self.inv].slots[3] = {
+        itemid = "kevlar_helmet",
+        amount = 1
     }
 
     RUST.Inventories[self.inv].slots[4] = {
@@ -80,6 +80,26 @@ function ENT:Initialize()
     RUST.Inventories[self.inv].slots[10] = {
         itemid = "arrow",
         amount = 16
+    }
+
+    RUST.Inventories[self.inv].slots[11] = {
+        itemid = "rock",
+        amount = 1
+    }
+
+    RUST.Inventories[self.inv].slots[12] = {
+        itemid = "stone_hatchet",
+        amount = 1
+    }
+
+    RUST.Inventories[self.inv].slots[13] = {
+        itemid = "hatchet",
+        amount = 1
+    }
+
+    RUST.Inventories[self.inv].slots[14] = {
+        itemid = "pickaxe",
+        amount = 1
     }
 end
 

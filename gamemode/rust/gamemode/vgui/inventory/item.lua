@@ -145,6 +145,24 @@ function PANEL:OpenOptions()
         end )
 
         self.menu:Open()
+    elseif( itemData.isWeapon && !itemData.isBow )then
+        self.menu = DermaMenu()
+        self.menu:AddOption( "Unload", function()
+            RUST.Unload(self:GetParent())
+        end )
+
+        self.menu:AddOption( "Drop", function()
+            RUST.DropItem(self:GetParent())
+        end )
+
+        self.menu:Open()
+    else
+        self.menu = DermaMenu()
+        self.menu:AddOption( "Drop", function()
+            RUST.DropItem(self:GetParent())
+        end )
+
+        self.menu:Open()
     end
 end
 

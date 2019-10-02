@@ -31,10 +31,6 @@ function PLAYER:AddItem(inv, itemid, amount, itemData)
 
                 if( itemData )then
                     invData[slot].itemData = itemData
-                end
-
-                if( itemData )then
-                    invData[slot].itemData = itemData
 
                     netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount, invData[slot].itemData)
                 else

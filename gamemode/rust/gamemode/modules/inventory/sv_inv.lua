@@ -343,6 +343,26 @@ netstream.Hook("RUST_Eat", function(ply, inv, slot)
     end
 end)
 
+netstream.Hook("RUST_Unload", function(ply, inv, slot)
+    local invData = RUST.Inventories[inv].slots
+
+    if( invData[slot] && !ply.CantSwitchSlot )then
+        local itemData = RUST.Items[invData[slot].itemid]
+
+        if( itemData.isWeapon && !itemData.isBow && invData[slot].itemData && invData[slot].itemData.clip && invData[slot].itemData.clip > 0 )then
+            local clipAmount = invData[slot].itemData.clip
+            invData[slot].itemData.clip = 0
+
+            ply:AddItem(ply:GetInv(), itemData.ammo, clipAmount)
+            netstream.Start(ply, "RUST_UpdateSlotItemData", inv, slot, invData[slot].itemData)
+
+            if( inv == ply:GetHotbarInv() && ply.CurrentSelectedSlot == slot )then
+                ply:GetActiveWeapon():SetClip1(0)
+            end
+        end
+    end
+end)
+
 netstream.Hook("RUST_InventoryClosed", function(ply)
     hook.Run("RUST_InventoryClosed", ply)
 end)

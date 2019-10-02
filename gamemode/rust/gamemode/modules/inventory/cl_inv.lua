@@ -27,6 +27,7 @@ end)
 
 netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount, itemData) // Inventar Slot updaten + im Inventar adden, wenn offen.
     local invData = RUST.Inventories[inv].slots
+    local ply = LocalPlayer()
 
     if( invData[slot] )then // Wenn Slot bereits vewendet, dann
         invData[slot].amount = amount // amount setzen
@@ -39,11 +40,27 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount, itemData) 
             invData[slot] = false
         end
 
-        if( RUST.VGUI.BasePanel && IsValid(RUST.VGUI.BasePanel) && RUST.VGUI.BasePanel.inventory )then
+        // TODO: OPTIMIZE AND MINIMIZE
+
+        if( IsValid(RUST.VGUI.BasePanel) && inv != ply:GetHotbarInv() )then
+            if( IsValid(RUST.VGUI.BasePanel.loot) && inv != ply:GetInv() )then
+                if( !invData[slot] )then
+                    RUST.VGUI.BasePanel.loot.list:GetChildren()[slot]:GetChildren()[1]:Remove()
+                else
+                    RUST.VGUI.BasePanel.loot.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+                end
+            elseif( IsValid(RUST.VGUI.BasePanel.inventory) )then
+                if( !invData[slot] )then
+                    RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:Remove()
+                else
+                    RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+                end
+            end
+        elseif( inv == ply:GetHotbarInv() )then
             if( !invData[slot] )then
-                RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:Remove()
+                RUST.VGUI.Hotbar.list:GetChildren()[slot]:GetChildren()[1]:Remove()
             else
-                RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+                RUST.VGUI.Hotbar.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
             end
         end
     else
@@ -55,8 +72,20 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount, itemData) 
             invData[slot].itemData = itemData
         end
 
-        if( RUST.VGUI.BasePanel && IsValid(RUST.VGUI.BasePanel) && RUST.VGUI.BasePanel.inventory )then // Item im Inventar erstellen
-            local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot])
+        // TODO: OPTIMIZE AND MINIMIZE
+
+        if( IsValid(RUST.VGUI.BasePanel) && inv != ply:GetHotbarInv() )then
+            if( IsValid(RUST.VGUI.BasePanel.loot) && inv != ply:GetInv() )then
+                local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.loot.list:GetChildren()[slot])
+                Item:SetItemID(invData[slot].itemid)
+                Item:SetAmount(invData[slot].amount)
+            elseif( IsValid(RUST.VGUI.BasePanel.inventory) )then
+                local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.inventory.list:GetChildren()[slot])
+                Item:SetItemID(invData[slot].itemid)
+                Item:SetAmount(invData[slot].amount)
+            end
+        elseif( inv == ply:GetHotbarInv() )then
+            local Item = vgui.Create("RUST_Item", RUST.VGUI.Hotbar.list:GetChildren()[slot])
             Item:SetItemID(invData[slot].itemid)
             Item:SetAmount(invData[slot].amount)
         end
@@ -81,6 +110,13 @@ end)
 
 // ------------------------------------------------------------------
 
+local types = {
+    RUST_ARMOR_TYPE_HEAD,
+    RUST_ARMOR_TYPE_CHEST,
+    RUST_ARMOR_TYPE_LEGS,
+    RUST_ARMOR_TYPE_FEET
+}
+
 function RUST.MoveItem(fromSlot, toSlot) // Item im Inventar moven, von Inventar zu Inventar moven, Items tauschen
     local ply = LocalPlayer()
 
@@ -98,12 +134,6 @@ function RUST.MoveItem(fromSlot, toSlot) // Item im Inventar moven, von Inventar
 
     if( toSlot.inv == armorInv )then
         local itemData = RUST.Items[fromSlotInvData[fromSlot.id].itemid]
-        local types = {
-            RUST_ARMOR_TYPE_HEAD,
-            RUST_ARMOR_TYPE_CHEST,
-            RUST_ARMOR_TYPE_LEGS,
-            RUST_ARMOR_TYPE_FEET
-        }
 
         if( !itemData.isArmor || itemData.type != types[toSlot.id] )then
             return
@@ -112,12 +142,6 @@ function RUST.MoveItem(fromSlot, toSlot) // Item im Inventar moven, von Inventar
         ply:EmitSound("item/sfx/zipper.wav", 75)
     elseif( fromSlot.inv == armorInv && toSlotInvData[toSlot.id] )then
         local itemData = RUST.Items[toSlotInvData[toSlot.id].itemid]
-        local types = {
-            RUST_ARMOR_TYPE_HEAD,
-            RUST_ARMOR_TYPE_CHEST,
-            RUST_ARMOR_TYPE_LEGS,
-            RUST_ARMOR_TYPE_FEET
-        }
 
         if( !itemData.isArmor || itemData.type != types[fromSlot.id] )then
             return
@@ -291,8 +315,18 @@ function RUST.Eat(slot)
     end
 
     ply:EmitSound("item/sfx/eating.wav", 75)
+    //TODO: eat func
 
     RUST.EatCoolDown = CurTime() + 2
 
     netstream.Start("RUST_Eat", slot.inv, slot.id)
+end
+
+function RUST.Unload(slot)
+    local invData = RUST.Inventories[slot.inv].slots
+    local ply = LocalPlayer()
+
+    if( !ply.CantSwitchSlot && invData[slot.id].itemData && invData[slot.id].itemData.clip && invData[slot.id].itemData.clip > 0 )then
+        netstream.Start("RUST_Unload", slot.inv, slot.id)
+    end
 end
