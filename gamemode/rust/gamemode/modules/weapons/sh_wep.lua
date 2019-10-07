@@ -5,8 +5,8 @@
 ]]--
 
 local weapons = {
-    ["tfa_rustalpha_m4"] = "556_ammo",
-    ["tfa_rustalpha_mp5"] = "556_ammo"
+    ["tfa_rustalpha_m4"] = "m4",
+    ["tfa_rustalpha_mp5"] = "mp5a4"
 }
 
 hook.Add("TFA_PreReload", "RUST_CheckAmmo", function(wep)
@@ -14,7 +14,8 @@ hook.Add("TFA_PreReload", "RUST_CheckAmmo", function(wep)
 
     if( data )then
         local ply = wep.Owner
-        local amount = RUST.GetItemAmountFromInv(ply:GetInv(), data)
+        local itemData = RUST.Items[data]
+        local amount = RUST.GetItemAmountFromInv(ply:GetInv(), itemData.ammo)
 
         if( ply.CantSwitchSlot )then return end
         if( wep:Clip1() >= wep.Primary.DefaultClip )then return true end
@@ -23,8 +24,6 @@ hook.Add("TFA_PreReload", "RUST_CheckAmmo", function(wep)
         ply.CantSwitchSlot = true
 
         if( SERVER )then
-            wep:SetClip1(0)
-
             if( amount >= ( wep.Primary.DefaultClip - wep:Clip1() ) )then
                 local amountToSet = wep.Primary.DefaultClip - wep:Clip1()
 
@@ -41,7 +40,8 @@ hook.Add("TFA_CompleteReload", "RUST_HandleAmmo", function(wep)
 
     if( data )then
         local ply = wep.Owner
-        local amount = RUST.GetItemAmountFromInv(ply:GetInv(), data)
+        local itemData = RUST.Items[data]
+        local amount = RUST.GetItemAmountFromInv(ply:GetInv(), itemData.ammo)
 
         if( !amount )then return true end
 
@@ -52,7 +52,7 @@ hook.Add("TFA_CompleteReload", "RUST_HandleAmmo", function(wep)
             invData[ply.CurrentSelectedSlot].itemData.clip = wep:Clip1() + amountToSet
 
             if( SERVER )then
-                ply:RemoveItem(ply:GetInv(), data, amountToSet)
+                ply:RemoveItem(ply:GetInv(), itemData.ammo, amountToSet)
                 netstream.Start(ply, "RUST_UpdateSlotItemData", ply:GetHotbarInv(), ply.CurrentSelectedSlot, invData[ply.CurrentSelectedSlot].itemData)
             end
         else
@@ -60,7 +60,7 @@ hook.Add("TFA_CompleteReload", "RUST_HandleAmmo", function(wep)
             invData[ply.CurrentSelectedSlot].itemData.clip = wep:Clip1() + amount
 
             if( SERVER )then
-                ply:RemoveItem(ply:GetInv(), data, amount)
+                ply:RemoveItem(ply:GetInv(), itemData.ammo, amount)
                 netstream.Start(ply, "RUST_UpdateSlotItemData", ply:GetHotbarInv(), ply.CurrentSelectedSlot, invData[ply.CurrentSelectedSlot].itemData)
             end
         end
@@ -68,9 +68,9 @@ hook.Add("TFA_CompleteReload", "RUST_HandleAmmo", function(wep)
 end)
 
 hook.Add("TFA_PostPrimaryAttack", "RUST_GiveAmmo", function(wep)
-    local data = weapons[wep:GetClass()]
-
     if( !SERVER )then return end
+
+    local data = weapons[wep:GetClass()]
 
     if( data )then
         local ply = wep.Owner
@@ -78,7 +78,7 @@ hook.Add("TFA_PostPrimaryAttack", "RUST_GiveAmmo", function(wep)
         local invData = RUST.Inventories[inv].slots
 
         if( invData[ply.CurrentSelectedSlot] && invData[ply.CurrentSelectedSlot].itemData && invData[ply.CurrentSelectedSlot].itemData.clip )then
-            invData[ply.CurrentSelectedSlot].itemData.clip = invData[ply.CurrentSelectedSlot].itemData.clip - 1
+            invData[ply.CurrentSelectedSlot].itemData.clip = wep:Clip1()
             netstream.Start(ply, "RUST_UpdateSlotItemData", inv, ply.CurrentSelectedSlot, invData[ply.CurrentSelectedSlot].itemData)
         end
     end

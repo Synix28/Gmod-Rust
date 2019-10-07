@@ -10,10 +10,17 @@ end
 // ------------------------------------------------------------------
 
 netstream.Hook("RUST_OpenInventory", function()
-    if( !RUST.VGUI.BasePanel )then // Wenn nicht offen, dann ...
+    if( !RUST.VGUI.BasePanel )then // Wenn nicht offen, dann ... ( nicht ändern! )
         RUST.VGUI.BasePanel = vgui.Create("RUST_Base")
         RUST.VGUI.BasePanel:OpenArmor()
         RUST.VGUI.BasePanel:OpenCrafting()
+    end
+end)
+
+netstream.Hook("RUST_CloseInventory", function()
+    if( IsValid(RUST.VGUI.BasePanel) )then // Wenn nicht offen, dann ...
+        RUST.VGUI.BasePanel:Remove()
+        RUST.VGUI.BasePanel = nil
     end
 end)
 
