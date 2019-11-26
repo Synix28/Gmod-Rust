@@ -7,6 +7,9 @@
 function GM:PlayerInitialSpawn(ply)
 end
 
+function GM:PlayerDeath(victim, inflictor, attacker)
+end
+
 function GM:PlayerSpawn(ply)
     ply:SetModel(RUST.PlayerConfig.Model)
     ply:SetupHands()
@@ -17,6 +20,8 @@ function GM:PlayerSpawn(ply)
     ply:SetDuckSpeed(RUST.PlayerConfig.DuckSpeed)
     ply:SetUnDuckSpeed(RUST.PlayerConfig.UnDuckSpeed)
 end
+
+// fix disguisting hands
 
 function GM:PlayerSetHandsModel( ply, ent )
 	local simplemodel = player_manager.TranslateToPlayerModelName( "models/player/eli.mdl" )

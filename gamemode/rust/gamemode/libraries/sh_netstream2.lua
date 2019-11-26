@@ -10,6 +10,15 @@
 --]]
 
 
+// ------------------------------------------------------------------------------------
+
+local string = string
+local type = type
+local net = net
+
+// ------------------------------------------------------------------------------------
+
+
 local type, error, pcall, pairs, _player = type, error, pcall, pairs, player;
 
 if (!pon) then

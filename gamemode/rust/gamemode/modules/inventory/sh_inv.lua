@@ -510,7 +510,8 @@ RUST.Items["m4"] = {
     name = "M4",
     icon = Material("rust/m4_icon.png"),
     max = 1,
-    ent = "m4_legacy",
+    ent = "tfa_rustalpha_m4",
+    ammo = "556_ammo",
     isWeapon = true
 }
 
@@ -518,7 +519,8 @@ RUST.Items["mp5a4"] = {
     name = "MP5A4",
     icon = Material("rust/mp5_icon.png"),
     max = 1,
-    ent = "mp5_legacy",
+    ent = "tfa_rustalpha_mp5",
+    ammo = "556_ammo",
     isWeapon = true
 }
 
@@ -527,6 +529,7 @@ RUST.Items["hunting_bow"] = {
     icon = Material("rust/hunting_bow_icon.png"),
     max = 1,
     ent = "rust_bow",
+    ammo = "arrow",
     isWeapon = true,
     isBow = true
 }
@@ -543,17 +546,17 @@ RUST.Items["hatchet"] = {
 
 RUST.Items["stone_hatchet"] = {
     name = "Stone Hatchet",
-    icon = Material("rust/rocktool_icon.png"),
+    icon = Material("rust/stone_hatchet_icon.png"),
     max = 1,
-    ent = "rust_hatchet",
+    ent = "rust_stone_hatchet",
     isMelee = true
 }
 
-RUST.Items["hands"] = {
-    name = "Hands",
+RUST.Items["rock"] = {
+    name = "Rock",
     icon = Material("rust/rocktool_icon.png"),
     max = 1,
-    ent = "rust_fists",
+    ent = "rust_rock",
     isMelee = true
 }
 

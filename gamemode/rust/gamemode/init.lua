@@ -66,4 +66,5 @@ for _, folder in SortedPairs(folders, true) do
 end
 
 hook.Run("RUST_FinishedLoading")
+
 MySQLite.initialize()

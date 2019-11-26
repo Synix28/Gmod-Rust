@@ -6,6 +6,7 @@
 
 local PLAYER = FindMetaTable("Player")
 
+// add amount dynamically to inv
 function PLAYER:AddItem(inv, itemid, amount, itemData)
     local invData = RUST.Inventories[inv].slots
     local freeSlots = RUST.HasSpaceForAmount(inv, itemid, amount)
@@ -27,10 +28,6 @@ function PLAYER:AddItem(inv, itemid, amount, itemData)
                 elseif( freeAmount > remainingAmount )then
                     invData[slot].amount = invData[slot].amount + remainingAmount
                     remainingAmount = 0
-                end
-
-                if( itemData )then
-                    invData[slot].itemData = itemData
                 end
 
                 if( itemData )then
@@ -74,6 +71,7 @@ function PLAYER:AddItem(inv, itemid, amount, itemData)
     return false
 end
 
+// remove amount dynamically from inv
 function PLAYER:RemoveItem(inv, itemid, amount)
     local invData = RUST.Inventories[inv].slots
     local availableAmount = RUST.GetItemAmountFromInv(self:GetInv(), itemid)
@@ -102,6 +100,21 @@ function PLAYER:RemoveItem(inv, itemid, amount)
                 end
             end
         end
+
+        return true
+    end
+
+    return false
+end
+
+function PLAYER:RemoveItemFromSlot(inv, slot)
+    local invData = RUST.Inventories[inv].slots
+
+    if( invData[slot] )then
+        local itemid = invData[slot].itemid
+        invData[slot] = false
+
+        netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, 0)
 
         return true
     end
