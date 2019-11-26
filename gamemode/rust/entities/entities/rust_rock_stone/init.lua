@@ -34,6 +34,11 @@ function ENT:Initialize()
     self:SetSkin(self.oreSkin)
 end
 
+function ENT:OnRemove()
+    RUST.ResourceLocations[self.id].ent = false
+    RUST.ResourceLocations[self.id].nextSpawn = CurTime() + RUST.ResourcesRespawnTime
+end
+
 function ENT:OnTakeDamage(dmginfo)
     local ply = dmginfo:GetAttacker()
     local wep = ply:GetActiveWeapon()

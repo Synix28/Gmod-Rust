@@ -10,3 +10,5 @@ RUST.FarmFactor = {
     ["rust_hatchet"] = 10,
     ["rust_pickaxe"] = 20
 }
+
+RUST.ResourcesRespawnTime = 5
