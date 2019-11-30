@@ -9,52 +9,53 @@ function ENT:Initialize()
     self:SetSolid(SOLID_VPHYSICS)
 
     self:SetUseType(SIMPLE_USE)
+    self:DropToFloor()
 
     local phys = self:GetPhysicsObject()
-    phys:Wake()
+    phys:EnableMotion(false)
 
-    self.inv = "Crate_Weapon_" .. self:EntIndex()
+    local inv = self:GetInv()
 
-    RUST.Inventories[self.inv] = {
+    RUST.Inventories[inv] = {
         owner = self,
         slots = {}
     }
 
     for i = 1, 20 do
-        RUST.Inventories[self.inv].slots[i] = false
+        RUST.Inventories[inv].slots[i] = false
     end
 
-    RUST.Inventories[self.inv].slots[1] = {
+    RUST.Inventories[inv].slots[1] = {
         itemid = "hunting_bow",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[2] = {
+    RUST.Inventories[inv].slots[2] = {
         itemid = "cooked_chicken",
         amount = 100
     }
 
-    RUST.Inventories[self.inv].slots[3] = {
+    RUST.Inventories[inv].slots[3] = {
         itemid = "kevlar_helmet",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[4] = {
+    RUST.Inventories[inv].slots[4] = {
         itemid = "kevlar_vest",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[5] = {
+    RUST.Inventories[inv].slots[5] = {
         itemid = "kevlar_pants",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[6] = {
+    RUST.Inventories[inv].slots[6] = {
         itemid = "kevlar_boots",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[7] = {
+    RUST.Inventories[inv].slots[7] = {
         itemid = "mp5a4",
         amount = 1,
         itemData = {
@@ -63,7 +64,7 @@ function ENT:Initialize()
         }
     }
 
-    RUST.Inventories[self.inv].slots[8] = {
+    RUST.Inventories[inv].slots[8] = {
         itemid = "m4",
         amount = 1,
         itemData = {
@@ -72,39 +73,43 @@ function ENT:Initialize()
         }
     }
 
-    RUST.Inventories[self.inv].slots[9] = {
+    RUST.Inventories[inv].slots[9] = {
         itemid = "556_ammo",
         amount = 200
     }
 
-    RUST.Inventories[self.inv].slots[10] = {
+    RUST.Inventories[inv].slots[10] = {
         itemid = "arrow",
         amount = 16
     }
 
-    RUST.Inventories[self.inv].slots[11] = {
+    RUST.Inventories[inv].slots[11] = {
         itemid = "rock",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[12] = {
+    RUST.Inventories[inv].slots[12] = {
         itemid = "stone_hatchet",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[13] = {
+    RUST.Inventories[inv].slots[13] = {
         itemid = "hatchet",
         amount = 1
     }
 
-    RUST.Inventories[self.inv].slots[14] = {
+    RUST.Inventories[inv].slots[14] = {
         itemid = "pickaxe",
         amount = 1
     }
 end
 
+function ENT:GetInv()
+    return "Crate_Weapon_" .. self:EntIndex()
+end
+
 function ENT:OnRemove()
-    RUST.Inventories[self.inv] = nil
+    RUST.Inventories[self:GetInv()] = nil
 end
 
 function ENT:Use(caller, activator)
@@ -112,15 +117,17 @@ function ENT:Use(caller, activator)
         self:SetUsedBy(caller)
         caller.Looting = self
 
-        netstream.Start(caller, "RUST_SyncInventory", self.inv, RUST.Inventories[self.inv])
-        netstream.Start(caller, "RUST_OpenLoot", self.inv)
+        local inv = self:GetInv()
+
+        netstream.Start(caller, "RUST_SyncInventory", inv, RUST.Inventories[inv])
+        netstream.Start(caller, "RUST_OpenLoot", inv)
     end
 end
 
 function ENT:CheckInv()
     local noLoot = true
 
-    for slot, item in ipairs(RUST.Inventories[self.inv].slots) do
+    for slot, item in ipairs(RUST.Inventories[self:GetInv()].slots) do
         if( item )then
             noLoot = false
         end

@@ -16,9 +16,7 @@ RUST.HotbarSlotKeys = {
 // ------------------------------------------------------------------
 
 netstream.Hook("RUST_ChangeSelectedSlot", function(ply, key)
-    if( !ply.HotbarCoolDown )then ply.HotbarCoolDown = -1 end
-
-    if( ply.HotbarCoolDown < CurTime() && RUST.HotbarSlotKeys[key] && !ply.CantSwitchSlot )then
+    if( ( ply.HotbarCoolDown || -1 ) < CurTime() && RUST.HotbarSlotKeys[key] && !ply.CantSwitchSlot )then
         local slot = RUST.HotbarSlotKeys[key]
         local invData = RUST.Inventories[ply:GetHotbarInv()].slots
 
@@ -32,6 +30,8 @@ netstream.Hook("RUST_ChangeSelectedSlot", function(ply, key)
                     ply.CurrentSelectedSlot = nil
                     ply.HotbarCoolDown = CurTime() + 1
 
+                    netstream.Start(ply, "RUST_UpdateHotbarCoolDown", ply.HotbarCoolDown)
+
                     return
                 end
 
@@ -44,14 +44,22 @@ netstream.Hook("RUST_ChangeSelectedSlot", function(ply, key)
 
                 ply.CurrentSelectedSlot = slot
                 ply.HotbarCoolDown = CurTime() + 1
-            elseif( itemData.isFood )then
+
+                netstream.Start(ply, "RUST_UpdateHotbarCoolDown", ply.HotbarCoolDown)
+            elseif( itemData.isFood && ( ply.EatCoolDown || -1 ) < CurTime() )then
                 if( ( invData[slot].amount - 1 ) == 0 )then
                     invData[slot] = false
                 else
                     invData[slot].amount = invData[slot].amount - 1
                 end
 
-                ply.HotbarCoolDown = CurTime() + 2
+                ply:AddFood(itemData.hunger)
+
+                ply.EatCoolDown = CurTime() + 2
+                ply.HotbarCoolDown = CurTime() + 1
+
+                netstream.Start(ply, "RUST_UpdateHotbarCoolDown", ply.HotbarCoolDown)
+                netstream.Start(ply, "RUST_UpdateEatCoolDown", ply.EatCoolDown)
             end
         end
     end

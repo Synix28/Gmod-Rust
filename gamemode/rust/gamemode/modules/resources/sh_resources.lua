@@ -12,3 +12,4 @@ RUST.FarmFactor = {
 }
 
 RUST.ResourcesRespawnTime = 5
+RUST.NextSpaceFreeCheck = 20

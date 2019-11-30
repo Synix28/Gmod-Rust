@@ -135,6 +135,10 @@ function RUST.MoveItem(fromSlot, toSlot) // Item im Inventar moven, von Inventar
     local fromSlotInvData = RUST.Inventories[fromSlot.inv].slots
     local toSlotInvData = RUST.Inventories[toSlot.inv].slots
 
+    if( fromSlot.inv == toSlot.inv && fromSlot.id == toSlot.id )then
+        return
+    end
+
     // check for armor inv
 
     local armorInv = ply:GetArmorInv()
@@ -307,7 +311,7 @@ function RUST.DropItem(slot) // Item droppen
 end
 
 function RUST.Eat(slot)
-    if( ( RUST.EatCoolDown || -1 ) > CurTime() )then return end
+    if( !RUST.EatCoolDown || RUST.EatCoolDown > CurTime() )then return end
 
     local invData = RUST.Inventories[slot.inv].slots
     local slotItem = slot:GetChildren()[1]
@@ -322,9 +326,8 @@ function RUST.Eat(slot)
     end
 
     ply:EmitSound("item/sfx/eating.wav", 75)
-    //TODO: eat func
 
-    RUST.EatCoolDown = CurTime() + 2
+    RUST.EatCoolDown = false
 
     netstream.Start("RUST_Eat", slot.inv, slot.id)
 end

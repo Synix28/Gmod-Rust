@@ -27,12 +27,13 @@ RUST.HotbarSlotKeysNum = {
 }
 
 RUST.HotbarCoolDown = -1
+RUST.EatCoolDown = -1
 
 // ------------------------------------------------------------------
 
 hook.Add("Think", "RUST_SelectSlot", function()
     for _, key in ipairs(RUST.HotbarSlotKeys) do
-        if( input.IsKeyDown(key) && RUST.HotbarCoolDown < CurTime() && !LocalPlayer().CantSwitchSlot )then
+        if( input.IsKeyDown(key) && RUST.HotbarCoolDown && RUST.HotbarCoolDown < CurTime() && !LocalPlayer().CantSwitchSlot )then
             local ply = LocalPlayer()
             local slot = RUST.HotbarSlotKeysNum[key]
             local invData = RUST.Inventories[ply:GetHotbarInv()].slots
@@ -42,19 +43,19 @@ hook.Add("Think", "RUST_SelectSlot", function()
 
                 if( itemData.isWeapon || itemData.isMelee )then
                     if( ply.CurrentSelectedSlot && ply.CurrentSelectedSlot == slot )then
-                        netstream.Start("RUST_ChangeSelectedSlot", key)
-
                         ply.CurrentSelectedSlot = nil
-                        ply.HotbarCoolDown = CurTime() + 1
+                        ply.HotbarCoolDown = false
+
+                        netstream.Start("RUST_ChangeSelectedSlot", key)
 
                         return
                     end
 
-                    netstream.Start("RUST_ChangeSelectedSlot", key)
-
                     ply.CurrentSelectedSlot = slot
-                    RUST.HotbarCoolDown = CurTime() + 1
-                elseif( itemData.isFood )then
+                    RUST.HotbarCoolDown = false
+
+                    netstream.Start("RUST_ChangeSelectedSlot", key)
+                elseif( itemData.isFood && RUST.EatCoolDown && RUST.EatCoolDown < CurTime() )then
                     if( ( invData[slot].amount - 1 ) == 0 )then
                         RUST.VGUI.Hotbar.list:GetChildren()[slot]:GetChildren()[1]:Remove()
                         invData[slot] = false
@@ -65,9 +66,10 @@ hook.Add("Think", "RUST_SelectSlot", function()
 
                     ply:EmitSound("item/sfx/eating.wav", 75)
 
-                    netstream.Start("RUST_ChangeSelectedSlot", key)
+                    RUST.EatCoolDown = false
+                    RUST.HotbarCoolDown = false
 
-                    RUST.HotbarCoolDown = CurTime() + 2
+                    netstream.Start("RUST_ChangeSelectedSlot", key)
                 end
             end
         end
@@ -79,4 +81,12 @@ end)
 netstream.Hook("RUST_ResetCantSwitchSlot", function(inv)
     local ply = LocalPlayer()
     ply.CantSwitchSlot = false
+end)
+
+netstream.Hook("RUST_UpdateEatCoolDown", function(cooldown)
+    RUST.EatCoolDown = cooldown + 0.05 // prevent desync
+end)
+
+netstream.Hook("RUST_UpdateHotbarCoolDown", function(cooldown)
+    RUST.HotbarCoolDown = cooldown + 0.05 // prevent desync
 end)

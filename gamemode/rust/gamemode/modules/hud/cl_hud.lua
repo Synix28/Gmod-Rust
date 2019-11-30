@@ -127,6 +127,11 @@ local types = {
 		pos = Vector(0, 0, 10),
 		text = "LOOT",
 		noTextOnOccupied = true
+	},
+	["rust_backpack"] = {
+		pos = Vector(0, 0, 10),
+		text = "LOOT",
+		noTextOnOccupied = true
 	}
 }
 
@@ -170,7 +175,7 @@ function HUD:DrawTheHUD()
 
 	-- Vars
 	local ply = LocalPlayer()
-	local food = ply:GetNWInt("rust_food", 0)
+	local food = ply:GetFood()
 	local radiation = ply:GetNWInt("rust_radiation", 0)
 
 	-- Basepanel

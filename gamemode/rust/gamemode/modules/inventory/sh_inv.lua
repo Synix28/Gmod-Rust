@@ -574,6 +574,7 @@ RUST.Items["cooked_chicken"] = {
     name = "Cooked Chicken",
     icon = Material("rust/cooked_chicken_breast_icon.png"),
     max = 250,
+    hunger = 500,
     isFood = true
 }
 

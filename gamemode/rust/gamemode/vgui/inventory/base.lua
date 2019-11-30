@@ -17,7 +17,7 @@ function PANEL:Init()
     self:MakePopup()
 
     self:Receiver("RUST_Slot", function( receiver, panels, isDropped, menuIndex, mouseX, mouseY )
-        if( isDropped )then
+        if( isDropped && self:IsHovered() )then
             RUST.DropItem(panels[1]:GetParent())
         end
     end, {} )
