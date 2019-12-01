@@ -140,6 +140,10 @@ function PANEL:OpenOptions()
             RUST.Eat(self:GetParent())
         end )
 
+        self.menu:AddOption( "Split", function()
+            RUST.Split(self:GetParent())
+        end )
+
         self.menu:AddOption( "Drop", function()
             RUST.DropItem(self:GetParent())
         end )

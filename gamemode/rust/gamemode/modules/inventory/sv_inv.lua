@@ -5,8 +5,8 @@
 ]]--
 
 hook.Add("DatabaseInitialized", "RUST_Inventory_SetupDB", function() // Tables erstellen
-    MySQLite.query("CREATE TABLE IF NOT EXISTS player_inventory ( steamid varchar(255) NOT NULL, slot int NOT NULL, amount int, itemid varchar(255), CONSTRAINT iid PRIMARY KEY (slot, steamid) )")
-    MySQLite.query("CREATE TABLE IF NOT EXISTS player_hotbar ( steamid varchar(255) NOT NULL, slot int NOT NULL, amount int, itemid varchar(255), CONSTRAINT hid PRIMARY KEY (slot, steamid) )")
+    MySQLite.query("CREATE TABLE IF NOT EXISTS player_inventory ( steamid varchar(255) NOT NULL, slot int NOT NULL, amount int NOT NULL, itemid varchar(255) NOT NULL, itemdata longtext, CONSTRAINT iid PRIMARY KEY (slot, steamid) )")
+    MySQLite.query("CREATE TABLE IF NOT EXISTS player_hotbar ( steamid varchar(255) NOT NULL, slot int NOT NULL, amount int NOT NULL, itemid varchar(255) NOT NULL, itemdata longtext, CONSTRAINT hid PRIMARY KEY (slot, steamid) )")
 end)
 
 hook.Add("PlayerButtonDown", "RUST_OpenInventory", function(ply, key) // Inventar öffnen
@@ -29,8 +29,8 @@ hook.Add("PlayerInitialSpawn", "RUST_SetupInventory", function(ply) // Inventare
     local inventory = RUST.Inventories["Player_Inv_" .. steamid].slots
     local hotbar = RUST.Inventories["Player_Hotbar_" .. steamid].slots
 
-    inventory.owner = ply // Owner setzen
-    hotbar.owner = ply
+    RUST.Inventories["Player_Inv_" .. steamid].owner = ply
+    RUST.Inventories["Player_Hotbar_" .. steamid].owner = ply
     RUST.Inventories["Player_Armor_" .. steamid].owner = ply
 
     // ------------
@@ -95,26 +95,24 @@ local types = { // needed for RUST_MoveItem and PlayerDeath
 }
 
 hook.Add("PlayerDeath", "RUST_ResetInventory", function(victim, inflictor, attacker)
-    local inv
-
     netstream.Start(ply, "RUST_CloseInventory")
 
-    inv = victim:GetInv()
+    local backpack = ents.Create("rust_backpack")
+    backpack:SetPos(victim:GetPos())
+    backpack:Spawn()
+    backpack:FillInventory(victim)
+    backpack:CheckInv()
 
-    for k, v in ipairs(RUST.Inventories[inv].slots) do
-        victim:RemoveItemFromSlot(inv, k)
-    end
+    local invs = {
+        victim:GetInv(),
+        victim:GetHotbarInv(),
+        victim:GetArmorInv()
+    }
 
-    inv = victim:GetArmorInv()
-
-    for k, v in ipairs(RUST.Inventories[inv].slots) do
-        victim:RemoveItemFromSlot(inv, k)
-    end
-
-    inv = victim:GetHotbarInv()
-
-    for k, v in ipairs(RUST.Inventories[inv].slots) do
-        victim:RemoveItemFromSlot(inv, k)
+    for _, inv in ipairs(invs) do
+        for k, v in ipairs(RUST.Inventories[inv].slots) do
+            victim:RemoveItemFromSlot(inv, k)
+        end
     end
 
     for aKey, armorType in ipairs(types) do
@@ -129,6 +127,10 @@ end)
 netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID, toSlotInv) // Item bewegen SV
     if( !RUST.Inventories[fromSlotInv] || !RUST.Inventories[toSlotInv] )then return end
 
+    if( fromSlotInv == toSlotInv && fromSlotID == toSlotID )then
+        return
+    end
+
     //local fromSlotOwner = RUST.Inventories[fromSlotInv].owner
     //local toSlotOwner = RUST.Inventories[toSlotInv].owner
 
@@ -141,6 +143,8 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
     )then
         local fromSlotInvData = RUST.Inventories[fromSlotInv].slots
         local toSlotInvData = RUST.Inventories[toSlotInv].slots
+
+        if( !hook.Run("CanMoveItem", ply, fromSlotID, fromSlotInv, fromSlotInvData, toSlotID, toSlotInv, toSlotInvData) ) then return end
 
         // check for armor inv
 
@@ -348,7 +352,7 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
 end)
 
 netstream.Hook("RUST_Eat", function(ply, inv, slot)
-    if( ( ply.EatCoolDown || -1 ) > CurTime() )then return end
+    if( ( ply.EatCoolDown || -1 ) > CurTime() )then netstream.Start(ply, "RUST_UpdateEatCoolDown", ply.EatCoolDown) return end
 
     local invData = RUST.Inventories[inv].slots
 
@@ -362,7 +366,12 @@ netstream.Hook("RUST_Eat", function(ply, inv, slot)
                 invData[slot].amount = invData[slot].amount - 1
             end
 
+            // TODO: ITEMDATA FOOD AMOUNT
+            ply:AddFood(itemData.hunger)
+
             ply.EatCoolDown = CurTime() + 2
+
+            netstream.Start(ply, "RUST_UpdateEatCoolDown", ply.EatCoolDown)
         end
     end
 end)
@@ -395,12 +404,17 @@ netstream.Hook("RUST_LootClosed", function(ply)
     hook.Run("RUST_LootClosed", ply)
 end)
 
+netstream.Hook("RUST_LightFire", function(ply, ent)
+    if( ent.IsCampfire && ply:GetPos():Distance(ent:GetPos()) < 300 )then
+        ent:LightFire()
+    end
+end)
+
 // ------------------------------------------------------------------
 
 function RUST.CheckLooting(ply)
     if( ply.Looting && IsValid(ply.Looting) )then
-        ply.Looting:SetUsedBy(nil)
-
+        ply.Looting:SetUsedBy(NULL)
         ply.Looting:CheckInv()
 
         ply.Looting = nil

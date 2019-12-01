@@ -17,7 +17,7 @@ function PANEL:Init()
     self:MakePopup()
 
     self:Receiver("RUST_Slot", function( receiver, panels, isDropped, menuIndex, mouseX, mouseY )
-        if( isDropped )then
+        if( isDropped && self:IsHovered() )then
             RUST.DropItem(panels[1]:GetParent())
         end
     end, {} )
@@ -72,6 +72,11 @@ end
 function PANEL:OpenLoot(inv)
     self.loot = vgui.Create("RUST_Loot", self)
     self.loot:SetInv(inv)
+end
+
+function PANEL:OpenCampfire(inv)
+    self.campfire = vgui.Create("RUST_Campfire", self)
+    self.campfire:SetInv(inv)
 end
 
 function PANEL:Paint(w, h)

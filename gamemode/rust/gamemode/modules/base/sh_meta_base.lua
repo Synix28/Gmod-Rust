@@ -5,11 +5,4 @@
 ]]--
 
 local PLAYER = FindMetaTable("Player")
-
-if( SERVER )then
-
-end
-
-if( CLIENT )then
-
-end
+local ENTITY = FindMetaTable("Entity")

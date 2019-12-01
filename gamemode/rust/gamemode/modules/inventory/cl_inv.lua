@@ -48,6 +48,7 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount, itemData) 
         end
 
         // TODO: OPTIMIZE AND MINIMIZE
+        // TODO: FURNACE HIER ADDEN
 
         if( IsValid(RUST.VGUI.BasePanel) && inv != ply:GetHotbarInv() )then
             if( IsValid(RUST.VGUI.BasePanel.loot) && inv != ply:GetInv() )then
@@ -55,6 +56,24 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount, itemData) 
                     RUST.VGUI.BasePanel.loot.list:GetChildren()[slot]:GetChildren()[1]:Remove()
                 else
                     RUST.VGUI.BasePanel.loot.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+                end
+            elseif( IsValid(RUST.VGUI.BasePanel.campfire) && inv != ply:GetInv() )then
+                if( !invData[slot] )then
+                    if( slot >= 1 && slot <= 6 )then
+                        RUST.VGUI.BasePanel.campfire.inventory.list:GetChildren()[slot]:GetChildren()[1]:Remove()
+                    elseif( slot == 7 )then
+                        RUST.VGUI.BasePanel.campfire.fireSlot:GetChildren()[1]:Remove()
+                    elseif( slot == 8 )then
+                        RUST.VGUI.BasePanel.campfire.coalSlot:GetChildren()[1]:Remove()
+                    end
+                else
+                    if( slot >= 1 && slot <= 6 )then
+                        RUST.VGUI.BasePanel.campfire.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+                    elseif( slot == 7 )then
+                        RUST.VGUI.BasePanel.campfire.fireSlot:GetChildren()[1]:SetAmount(invData[slot].amount)
+                    elseif( slot == 8 )then
+                        RUST.VGUI.BasePanel.campfire.coalSlot:GetChildren()[1]:SetAmount(invData[slot].amount)
+                    end
                 end
             elseif( IsValid(RUST.VGUI.BasePanel.inventory) )then
                 if( !invData[slot] )then
@@ -71,7 +90,7 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount, itemData) 
             end
         end
     else
-        invData[slot] = {} // ansonsten Item erstellen
+        invData[slot] = {}
         invData[slot].itemid = itemid
         invData[slot].amount = amount
 
@@ -80,9 +99,24 @@ netstream.Hook("RUST_UpdateSlot", function(inv, slot, itemid, amount, itemData) 
         end
 
         // TODO: OPTIMIZE AND MINIMIZE
+        // TODO: FURNACE AUCH HIER ADDEN
 
         if( IsValid(RUST.VGUI.BasePanel) && inv != ply:GetHotbarInv() )then
-            if( IsValid(RUST.VGUI.BasePanel.loot) && inv != ply:GetInv() )then
+            if( IsValid(RUST.VGUI.BasePanel.campfire) && inv != ply:GetInv() )then
+                if( slot >= 1 && slot <= 6 )then
+                    local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.campfire.list:GetChildren()[slot])
+                    Item:SetItemID(invData[slot].itemid)
+                    Item:SetAmount(invData[slot].amount)
+                elseif( slot == 7 )then
+                    local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.campfire.fireSlot)
+                    Item:SetItemID(invData[slot].itemid)
+                    Item:SetAmount(invData[slot].amount)
+                elseif( slot == 8 )then
+                    local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.campfire.coalSlot)
+                    Item:SetItemID(invData[slot].itemid)
+                    Item:SetAmount(invData[slot].amount)
+                end
+            elseif( IsValid(RUST.VGUI.BasePanel.loot) && inv != ply:GetInv() )then
                 local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.loot.list:GetChildren()[slot])
                 Item:SetItemID(invData[slot].itemid)
                 Item:SetAmount(invData[slot].amount)
@@ -107,12 +141,21 @@ netstream.Hook("RUST_UpdateSlotItemData", function(inv, slot, itemData)
     end
 end)
 
+// ------------------------------------------------------------------
+
 netstream.Hook("RUST_OpenLoot", function(inv)
-    if( !RUST.VGUI.BasePanel || !IsValid(RUST.VGUI.BasePanel) )then // Wenn nicht offen, dann ...
+    if( !RUST.VGUI.BasePanel || !IsValid(RUST.VGUI.BasePanel) )then
         RUST.VGUI.BasePanel = vgui.Create("RUST_Base")
         RUST.VGUI.BasePanel:OpenArmor()
         RUST.VGUI.BasePanel:OpenLoot(inv)
+    else
+        RUST.VGUI.BasePanel:OpenLoot(inv)
     end
+end)
+
+netstream.Hook("RUST_OpenCampfire", function(inv)
+    local selection = vgui.Create("RUST_Interaction_Campfire")
+    selection:SetInv(inv)
 end)
 
 // ------------------------------------------------------------------
@@ -134,6 +177,12 @@ function RUST.MoveItem(fromSlot, toSlot) // Item im Inventar moven, von Inventar
 
     local fromSlotInvData = RUST.Inventories[fromSlot.inv].slots
     local toSlotInvData = RUST.Inventories[toSlot.inv].slots
+
+    if( fromSlot.inv == toSlot.inv && fromSlot.id == toSlot.id )then
+        return
+    end
+    
+    if( !hook.Run("CanMoveItem", ply, fromSlot.id, fromSlot.inv, fromSlotInvData, toSlot.id, toSlot.inv, toSlotInvData) ) then return end
 
     // check for armor inv
 
@@ -307,7 +356,7 @@ function RUST.DropItem(slot) // Item droppen
 end
 
 function RUST.Eat(slot)
-    if( ( RUST.EatCoolDown || -1 ) > CurTime() )then return end
+    if( !RUST.EatCoolDown || RUST.EatCoolDown > CurTime() )then return end
 
     local invData = RUST.Inventories[slot.inv].slots
     local slotItem = slot:GetChildren()[1]
@@ -322,9 +371,8 @@ function RUST.Eat(slot)
     end
 
     ply:EmitSound("item/sfx/eating.wav", 75)
-    //TODO: eat func
 
-    RUST.EatCoolDown = CurTime() + 2
+    RUST.EatCoolDown = false
 
     netstream.Start("RUST_Eat", slot.inv, slot.id)
 end

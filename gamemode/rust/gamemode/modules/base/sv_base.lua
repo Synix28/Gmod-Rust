@@ -19,6 +19,8 @@ function GM:PlayerSpawn(ply)
 
     ply:SetDuckSpeed(RUST.PlayerConfig.DuckSpeed)
     ply:SetUnDuckSpeed(RUST.PlayerConfig.UnDuckSpeed)
+
+	ply:SetFood(1500)
 end
 
 // fix disguisting hands

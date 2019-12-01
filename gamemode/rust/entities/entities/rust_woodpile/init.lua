@@ -28,6 +28,8 @@ function ENT:Initialize()
 end
 
 function ENT:OnRemove()
+    if( !self.id )then return end
+
     RUST.ResourceLocations[self.id].ent = false
     RUST.ResourceLocations[self.id].nextSpawn = CurTime() + RUST.ResourcesRespawnTime
 end

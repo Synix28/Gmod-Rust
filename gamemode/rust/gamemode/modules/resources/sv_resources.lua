@@ -24,7 +24,13 @@ local resourceEnts = {
 
 hook.Add("Think", "RUST_RespawnResources", function()
     for k, posInfo in ipairs(RUST.ResourceLocations) do
-        if( !IsValid(posInfo.ent) && posInfo.nextSpawn < CurTime() && RUST.isEmpty(posInfo.pos) )then
+        if( !IsValid(posInfo.ent) && posInfo.nextSpawn < CurTime() )then
+            if( !RUST.isEmpty(posInfo.pos) )then
+                RUST.ResourceLocations[k].nextSpawn = CurTime() + RUST.NextSpaceFreeCheck
+
+                continue
+            end
+
             local ent = ents.Create(resourceEnts[math.random(1, #resourceEnts)])
             ent:SetPos(posInfo.pos)
             ent:SetAngles(posInfo.angle)
@@ -38,17 +44,21 @@ end)
 
 // ------------------------------------------------------------------
 
-hook.Add("DatabaseInitialized", "RUST_Resources_InitDB", function() // Tables erstellen
+hook.Add("DatabaseInitialized", "RUST_Resources_InitDB", function()
     MySQLite.query([[
         CREATE TABLE IF NOT EXISTS resources_pos
         (
-            x decimal(10, 5),
-            y decimal(10, 5),
-            z decimal(10, 5),
+            pid int NOT NULL AUTO_INCREMENT,
 
-            pitch decimal(10, 5),
-            yaw decimal(10, 5),
-            roll decimal(10, 5)
+            x decimal(10, 5) NOT NULL,
+            y decimal(10, 5) NOT NULL,
+            z decimal(10, 5) NOT NULL,
+
+            pitch decimal(10, 5) NOT NULL,
+            yaw decimal(10, 5) NOT NULL,
+            roll decimal(10, 5) NOT NULL,
+
+            PRIMARY KEY(pid)
         )
     ]])
 
@@ -143,7 +153,7 @@ function RUST.isEmpty(vector, ignore)
 
     local b = true
 
-    for _, v in ipairs(ents.FindInSphere(vector, 50)) do
+    for _, v in ipairs(ents.FindInSphere(vector, 60)) do
         if (v:IsNPC() or v:IsPlayer() or v:GetClass() == "prop_physics" or v.NotEmptyPos) and not table.HasValue(ignore, v) then
             b = false
             break

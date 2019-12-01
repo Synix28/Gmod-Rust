@@ -118,6 +118,9 @@ Draws Icon
 
 local icon = Material("rust/postprocessing/context_icon.png")
 
+
+// TODO: EDIT THIS TO WORK IN CL_INIT OF ENTITIES!
+
 local types = {
 	["rust_item"] = {
 		pos = Vector(0, 0, 10),
@@ -127,7 +130,17 @@ local types = {
 		pos = Vector(0, 0, 10),
 		text = "LOOT",
 		noTextOnOccupied = true
-	}
+	},
+	["rust_backpack"] = {
+		pos = Vector(0, 0, 10),
+		text = "LOOT",
+		noTextOnOccupied = true
+	},
+	["rust_struct_campfire"] = {
+		pos = Vector(0, 0, 10),
+		text = "LOOT",
+		noTextOnOccupied = true
+	},
 }
 
 function HUD:CONTEXT_ICON(ply)
@@ -170,7 +183,7 @@ function HUD:DrawTheHUD()
 
 	-- Vars
 	local ply = LocalPlayer()
-	local food = ply:GetNWInt("rust_food", 0)
+	local food = ply:GetFood()
 	local radiation = ply:GetNWInt("rust_radiation", 0)
 
 	-- Basepanel

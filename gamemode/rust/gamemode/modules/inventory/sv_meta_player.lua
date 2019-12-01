@@ -121,3 +121,21 @@ function PLAYER:RemoveItemFromSlot(inv, slot)
 
     return false
 end
+
+function PLAYER:RemoveItemAmountFromSlot(inv, slot, amount)
+    local invData = RUST.Inventories[inv].slots
+
+    if( invData[slot] && invData[slot].amount >= amount )then
+        invData[slot].amount = invData[slot].amount - amount
+
+        netstream.Start(self, "RUST_UpdateSlot", inv, slot, invData[slot].itemid, invData[slot].amount)
+
+        if( invData[slot].amount <= 0 )then
+            invData[slot] = false
+        end
+
+        return true
+    end
+
+    return false
+end

@@ -89,13 +89,6 @@ RUST.Items["metal_fragments"] = {
     isResource = true
 }
 
-RUST.Items["metal_fragments"] = {
-    name = "Metal Fragments",
-    icon = Material("rust/metal_fragments_icon.png"),
-    max = 250,
-    isResource = true
-}
-
 RUST.Items["metal_ore"] = {
     name = "Metal Ore",
     icon = Material("rust/ore1_icon.png"),
@@ -570,11 +563,31 @@ RUST.Items["pickaxe"] = {
 
 // ------------------------------------------------------------------
 
+RUST.Items["raw_chicken"] = {
+    name = "Raw Chicken",
+    icon = Material("rust/chicken_breast_icon.png"),
+    max = 250,
+    hunger = 80,
+    isFood = true
+}
+
 RUST.Items["cooked_chicken"] = {
     name = "Cooked Chicken",
     icon = Material("rust/cooked_chicken_breast_icon.png"),
     max = 250,
+    hunger = 500,
     isFood = true
+}
+
+// ------------------------------------------------------------------
+
+RUST.RawFood = {
+    ["raw_chicken"] = "cooked_chicken"
+}
+
+RUST.Ores = {
+    ["metal_ore"] = true,
+    ["sulfur_ore"] = true
 }
 
 // ------------------------------------------------------------------
@@ -606,6 +619,31 @@ function RUST.FreeSlots(inv, amount)
     else
         for slot, data in ipairs(RUST.Inventories[inv].slots) do
             if( !data )then
+                table.insert(freeSlots, slot)
+            end
+        end
+    end
+
+    return freeSlots
+end
+
+function RUST.FreeSlotsMinMax(inv, amount, minSlot, maxSlot)
+    local freeSlots = {}
+
+    if( amount )then
+        for slot, data in ipairs(RUST.Inventories[inv].slots) do
+            if( !data && slot >= minSlot && slot <= maxSlot )then
+                table.insert(freeSlots, slot)
+                amount = amount - 1
+
+                if( amount <= 0 )then
+                    return freeSlots
+                end
+            end
+        end
+    else
+        for slot, data in ipairs(RUST.Inventories[inv].slots) do
+            if( !data && slot >= minSlot && slot <= maxSlot )then
                 table.insert(freeSlots, slot)
             end
         end
@@ -648,6 +686,149 @@ function RUST.HasSpaceForAmount(inv, itemid, amount)
     return false
 end
 
+function RUST.HasSpaceForAmountMinMax(inv, itemid, amount, minSlot, maxSlot)
+    local invData = RUST.Inventories[inv].slots
+    local max = RUST.Items[itemid].max
+
+    local freeSlots = {}
+    local remainingAmount = amount
+
+    for slot, data in ipairs(invData) do
+        if( data && data.itemid == itemid && data.amount < max && slot >= minSlot && slot <= maxSlot )then
+            remainingAmount = remainingAmount - ( max - data.amount )
+            table.insert(freeSlots, slot)
+
+            if( remainingAmount <= 0 )then
+                return freeSlots
+            end
+        end
+    end
+
+    if( remainingAmount > 0 )then
+        local neededSlots = math.ceil(remainingAmount / max)
+        local invFreeSlots = RUST.FreeSlotsMinMax(inv, neededSlots, minSlot, maxSlot)
+
+        if( #invFreeSlots >= neededSlots )then
+            for _, slot in ipairs(invFreeSlots) do
+                table.insert(freeSlots, slot)
+            end
+
+            return freeSlots
+        end
+    end
+
+    return false
+end
+
+function RUST.AddItemMinMax(inv, itemid, amount, itemData, min, max, ply)
+    local invData = RUST.Inventories[inv].slots
+    local freeSlots = RUST.HasSpaceForAmountMinMax(inv, itemid, amount, min, max)
+
+    local max = RUST.Items[itemid].max
+
+    if( freeSlots )then
+        local remainingAmount = amount
+
+        for _, slot in ipairs(freeSlots) do
+            local data = invData[slot]
+
+            if( data && data.amount < max )then
+                local freeAmount = max - data.amount
+
+                if( freeAmount <= remainingAmount )then
+                    invData[slot].amount = max
+                    remainingAmount = remainingAmount - freeAmount
+                elseif( freeAmount > remainingAmount )then
+                    invData[slot].amount = invData[slot].amount + remainingAmount
+                    remainingAmount = 0
+                end
+
+                if( itemData )then
+                    invData[slot].itemData = itemData
+
+                    if( IsValid(ply) )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount, invData[slot].itemData)
+                    end
+                else
+                    if( IsValid(ply) )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                    end
+                end
+            end
+
+            if( !data )then
+                invData[slot] = {}
+                invData[slot].itemid = itemid
+
+                if( remainingAmount >= max )then
+                    invData[slot].amount = max
+                    remainingAmount = remainingAmount - max
+                else
+                    invData[slot].amount = remainingAmount
+                    remainingAmount = 0
+                end
+
+                if( itemData )then
+                    invData[slot].itemData = itemData
+
+                    if( IsValid(ply) )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount, invData[slot].itemData)
+                    end
+                else
+                    if( IsValid(ply) )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                    end
+                end
+            end
+
+            if( remainingAmount <= 0 )then
+                break
+            end
+        end
+
+        return true
+    end
+
+    return false
+end
+
+function RUST.RemoveItemFromSlot(inv, slot, ply)
+    local invData = RUST.Inventories[inv].slots
+
+    if( invData[slot] )then
+        local itemid = invData[slot].itemid
+        invData[slot] = false
+
+        if( IsValid(ply) )then
+            netstream.Start(self, "RUST_UpdateSlot", inv, slot, itemid, 0)
+        end
+
+        return true
+    end
+
+    return false
+end
+
+function RUST.RemoveItemAmountFromSlot(inv, slot, amount, ply)
+    local invData = RUST.Inventories[inv].slots
+
+    if( invData[slot] && invData[slot].amount >= amount )then
+        invData[slot].amount = invData[slot].amount - amount
+
+        if( IsValid(ply) )then
+            netstream.Start(self, "RUST_UpdateSlot", inv, slot, invData[slot].itemid, invData[slot].amount)
+        end
+
+        if( invData[slot].amount <= 0 )then
+            invData[slot] = false
+        end
+
+        return true
+    end
+
+    return false
+end
+
 function RUST.GetItemAmountFromInv(inv, itemid)
     local invData = RUST.Inventories[inv].slots
     local amount = false
@@ -661,4 +842,10 @@ function RUST.GetItemAmountFromInv(inv, itemid)
     end
 
     return amount
+end
+
+// ------------------------------------------------------------------
+
+function GM:CanMoveItem(ply, fromSlotID, fromSlotInv, fromSlotInvData, toSlotID, toSlotInv, toSlotInvData)
+    return true
 end
