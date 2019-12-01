@@ -29,8 +29,8 @@ hook.Add("PlayerInitialSpawn", "RUST_SetupInventory", function(ply) // Inventare
     local inventory = RUST.Inventories["Player_Inv_" .. steamid].slots
     local hotbar = RUST.Inventories["Player_Hotbar_" .. steamid].slots
 
-    inventory.owner = ply // Owner setzen
-    hotbar.owner = ply
+    RUST.Inventories["Player_Inv_" .. steamid].owner = ply
+    RUST.Inventories["Player_Hotbar_" .. steamid].owner = ply
     RUST.Inventories["Player_Armor_" .. steamid].owner = ply
 
     // ------------
@@ -143,6 +143,8 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
     )then
         local fromSlotInvData = RUST.Inventories[fromSlotInv].slots
         local toSlotInvData = RUST.Inventories[toSlotInv].slots
+
+        if( !hook.Run("CanMoveItem", ply, fromSlotID, fromSlotInv, fromSlotInvData, toSlotID, toSlotInv, toSlotInvData) ) then return end
 
         // check for armor inv
 
@@ -402,12 +404,17 @@ netstream.Hook("RUST_LootClosed", function(ply)
     hook.Run("RUST_LootClosed", ply)
 end)
 
+netstream.Hook("RUST_LightFire", function(ply, ent)
+    if( ent.IsCampfire && ply:GetPos():Distance(ent:GetPos()) < 300 )then
+        ent:LightFire()
+    end
+end)
+
 // ------------------------------------------------------------------
 
 function RUST.CheckLooting(ply)
     if( ply.Looting && IsValid(ply.Looting) )then
-        ply.Looting:SetUsedBy(nil)
-
+        ply.Looting:SetUsedBy(NULL)
         ply.Looting:CheckInv()
 
         ply.Looting = nil

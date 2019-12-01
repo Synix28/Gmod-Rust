@@ -28,6 +28,25 @@ function ENT:SetItemData(itemData)
     self.itemData = itemData
 end
 
+function ENT:StartTouch(ent)
+    local itemData = RUST.Items[self:GetItemID()]
+
+    if( ent:GetClass() != "rust_item" )then return end
+    if( self:GetAmount() == itemData.max ) then return end
+
+    if( ent:GetItemID() == self:GetItemID() )then
+        local remainingAmount = ent:GetAmount() + self:GetAmount()
+
+        if( itemData.max < ( remainingAmount ) )then
+            self:SetAmount(itemData.max)
+            ent:SetAmount(remainingAmount - itemData.max)
+        else
+            ent:Remove()
+            self:SetAmount(remainingAmount)
+        end
+    end
+end
+
 function ENT:Use(caller, activator)
     if( caller:IsPlayer() && caller:AddItem(caller:GetInv(), self:GetItemID(), self:GetAmount(), self.itemData) )then
         self:Remove()

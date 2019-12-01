@@ -130,6 +130,10 @@ function PLAYER:RemoveItemAmountFromSlot(inv, slot, amount)
 
         netstream.Start(self, "RUST_UpdateSlot", inv, slot, invData[slot].itemid, invData[slot].amount)
 
+        if( invData[slot].amount <= 0 )then
+            invData[slot] = false
+        end
+
         return true
     end
 

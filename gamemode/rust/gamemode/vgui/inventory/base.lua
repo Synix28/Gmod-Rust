@@ -74,6 +74,11 @@ function PANEL:OpenLoot(inv)
     self.loot:SetInv(inv)
 end
 
+function PANEL:OpenCampfire(inv)
+    self.campfire = vgui.Create("RUST_Campfire", self)
+    self.campfire:SetInv(inv)
+end
+
 function PANEL:Paint(w, h)
 end
 
