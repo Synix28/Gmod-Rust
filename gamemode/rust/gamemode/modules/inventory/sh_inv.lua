@@ -849,3 +849,9 @@ end
 function GM:CanMoveItem(ply, fromSlotID, fromSlotInv, fromSlotInvData, toSlotID, toSlotInv, toSlotInvData)
     return true
 end
+
+// TODO: IMPLEMENT CANDROP ( Weapons on reload )
+
+function GM:CanDrop()
+    return true
+end

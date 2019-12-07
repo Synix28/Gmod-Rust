@@ -34,10 +34,7 @@ function PANEL:Init()
     self.armorButton:SetPos(w / 2 - 50 - 55, 5)
     self.armorButton:SetTabText("Armor")
     self.armorButton:SetTabFunc(function(parent)
-        if( IsValid(parent.armor) )then
-            parent.armor:Remove()
-            parent.armor = nil
-        else
+        if( !parent:CheckLeftPanel() )then
             parent:OpenArmor()
         end
     end)
@@ -46,42 +43,57 @@ function PANEL:Init()
     self.craftingButton:SetPos(w / 2 - 50 + 55, 5)
     self.craftingButton:SetTabText("Crafting")
     self.craftingButton:SetTabFunc(function(parent)
-        if( IsValid(parent.crafting) )then
-            parent.crafting:Remove()
-            parent.crafting = nil
-        else
+        if( !parent:CheckRightPanel() )then
             parent:OpenCrafting()
         end
     end)
 end
 
+function PANEL:CheckRightPanel()
+    if( IsValid(self.rightPanel) )then
+        self.rightPanel:Remove()
+        self.rightPanel = nil
+
+        return true
+    end
+
+    return false
+end
+
+function PANEL:CheckLeftPanel()
+    if( IsValid(self.leftPanel) )then
+        self.leftPanel:Remove()
+        self.leftPanel = nil
+
+        return true
+    end
+
+    return false
+end
+
 function PANEL:OpenArmor()
-    self.armor = vgui.Create("RUST_Armor", self)
+    self:CheckRightPanel()
+    self.leftPanel = vgui.Create("RUST_Armor", self)
 end
 
 // TODO: MAKE THIS MORE DYNAMIC
 // self.leftPanel && self.rightPanel
 
 function PANEL:OpenCrafting()
-    if( IsValid(self.loot) )then
-        self.loot:Remove()
-    elseif( IsValid(self.campfire) )then
-        self.campfire:Remove()
-
-        netstream.Start("RUST_LootClosed")
-    end
-
-    self.crafting = vgui.Create("RUST_Crafting", self)
+    self:CheckRightPanel()
+    self.rightPanel = vgui.Create("RUST_Crafting", self)
 end
 
 function PANEL:OpenLoot(inv)
-    self.loot = vgui.Create("RUST_Loot", self)
-    self.loot:SetInv(inv)
+    self:CheckRightPanel()
+    self.rightPanel = vgui.Create("RUST_Loot", self)
+    self.rightPanel:SetInv(inv)
 end
 
 function PANEL:OpenCampfire(inv)
-    self.campfire = vgui.Create("RUST_Campfire", self)
-    self.campfire:SetInv(inv)
+    self:CheckRightPanel()
+    self.rightPanel = vgui.Create("RUST_Campfire", self)
+    self.rightPanel:SetInv(inv)
 end
 
 function PANEL:Paint(w, h)

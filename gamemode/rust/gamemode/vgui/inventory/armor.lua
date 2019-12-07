@@ -79,3 +79,7 @@ function PANEL:Paint(w, h)
 end
 
 vgui.Register("RUST_Armor", PANEL, "DPanel")
+
+// ------------------------------------------------------------------
+
+// TODO: ADD ARMOR UPDATE HOOK

@@ -92,3 +92,4 @@ hook.Add("TFA_CompleteReload", "RUST_PreventWeaponSwitching", function(wep)
         ply.CantSwitchSlot = false
     end
 end)
+

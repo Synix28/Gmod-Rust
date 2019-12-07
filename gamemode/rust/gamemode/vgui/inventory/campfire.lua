@@ -95,6 +95,10 @@ function PANEL:SetInv(inv)
     end
 end
 
+function PANEL:OnRemove()
+    netstream.Start("RUST_LootClosed")
+end
+
 PANEL.campfireIcon = Material("rust/hudicons/campfire.png")
 PANEL.bloodIcon = Material("rust/hudicons/blooddrop.png")
 
@@ -117,3 +121,43 @@ function PANEL:Paint(w, h)
 end
 
 vgui.Register("RUST_Campfire", PANEL, "DPanel")
+
+// ------------------------------------------------------------------
+
+hook.Add("RUST_Update_Side_Panel_Slot", "RUST_Handle_Campfire_Update", function(create, invData, inv, slot, itemid, amount, itemData)
+    if( IsValid(RUST.VGUI.BasePanel.rightPanel) && RUST.VGUI.BasePanel.rightPanel:GetName() == "RUST_Campfire" )then
+        if( create )then
+            if( slot >= 1 && slot <= 6 )then
+                local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.rightPanel.list:GetChildren()[slot])
+                Item:SetItemID(invData[slot].itemid)
+                Item:SetAmount(invData[slot].amount)
+            elseif( slot == 7 )then
+                local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.rightPanel.fireSlot)
+                Item:SetItemID(invData[slot].itemid)
+                Item:SetAmount(invData[slot].amount)
+            elseif( slot == 8 )then
+                local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.rightPanel.coalSlot)
+                Item:SetItemID(invData[slot].itemid)
+                Item:SetAmount(invData[slot].amount)
+            end
+        else
+            if( !invData[slot] )then
+                if( slot >= 1 && slot <= 6 )then
+                    RUST.VGUI.BasePanel.rightPanel.inventory.list:GetChildren()[slot]:GetChildren()[1]:Remove()
+                elseif( slot == 7 )then
+                    RUST.VGUI.BasePanel.rightPanel.fireSlot:GetChildren()[1]:Remove()
+                elseif( slot == 8 )then
+                    RUST.VGUI.BasePanel.rightPanel.coalSlot:GetChildren()[1]:Remove()
+                end
+            else
+                if( slot >= 1 && slot <= 6 )then
+                    RUST.VGUI.BasePanel.rightPanel.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+                elseif( slot == 7 )then
+                    RUST.VGUI.BasePanel.rightPanel.fireSlot:GetChildren()[1]:SetAmount(invData[slot].amount)
+                elseif( slot == 8 )then
+                    RUST.VGUI.BasePanel.rightPanel.coalSlot:GetChildren()[1]:SetAmount(invData[slot].amount)
+                end
+            end
+        end
+    end
+end)

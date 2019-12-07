@@ -95,7 +95,7 @@ local types = { // needed for RUST_MoveItem and PlayerDeath
 }
 
 hook.Add("PlayerDeath", "RUST_ResetInventory", function(victim, inflictor, attacker)
-    netstream.Start(ply, "RUST_Close_VGUI_ELements")
+    netstream.Start(ply, "RUST_Close_VGUI_Elements")
 
     local backpack = ents.Create("rust_backpack")
     backpack:SetPos(victim:GetPos())
