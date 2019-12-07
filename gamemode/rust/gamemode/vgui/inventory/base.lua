@@ -59,9 +59,14 @@ function PANEL:OpenArmor()
     self.armor = vgui.Create("RUST_Armor", self)
 end
 
+// TODO: MAKE THIS MORE DYNAMIC
+// self.leftPanel && self.rightPanel
+
 function PANEL:OpenCrafting()
     if( IsValid(self.loot) )then
         self.loot:Remove()
+    elseif( IsValid(self.campfire) )then
+        self.campfire:Remove()
 
         netstream.Start("RUST_LootClosed")
     end

@@ -58,6 +58,10 @@ function PANEL:SetInv(inv)
     end
 end
 
+function PANEL:OnRemove()
+    netstream.Start("RUST_LootClosed")
+end
+
 function PANEL:Paint(w, h)
     // -- Main
 

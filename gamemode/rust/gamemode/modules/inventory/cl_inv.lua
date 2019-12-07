@@ -17,10 +17,17 @@ netstream.Hook("RUST_OpenInventory", function()
     end
 end)
 
-netstream.Hook("RUST_CloseInventory", function()
+netstream.Hook("RUST_Close_VGUI_ELements", function()
     if( IsValid(RUST.VGUI.BasePanel) )then // Wenn nicht offen, dann ...
         RUST.VGUI.BasePanel:Remove()
         RUST.VGUI.BasePanel = nil
+    end
+
+    if( IsValid(RUST.VGUI.Interaction) )then
+        RUST.VGUI.Interaction:Remove()
+        RUST.VGUI.Interaction = nil
+
+        netstream.Start("RUST_LootClosed")
     end
 end)
 
@@ -154,8 +161,13 @@ netstream.Hook("RUST_OpenLoot", function(inv)
 end)
 
 netstream.Hook("RUST_OpenCampfire", function(inv)
-    local selection = vgui.Create("RUST_Interaction_Campfire")
-    selection:SetInv(inv)
+    if( IsValid(RUST.VGUI.Interaction) )then
+        RUST.VGUI.Interaction:Remove()
+        RUST.VGUI.Interaction = nil
+    end
+
+    RUST.VGUI.Interaction = vgui.Create("RUST_Interaction_Campfire")
+    RUST.VGUI.Interaction:SetInv(inv)
 end)
 
 // ------------------------------------------------------------------
