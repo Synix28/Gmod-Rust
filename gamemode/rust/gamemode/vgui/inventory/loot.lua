@@ -58,6 +58,10 @@ function PANEL:SetInv(inv)
     end
 end
 
+function PANEL:OnRemove()
+    netstream.Start("RUST_LootClosed")
+end
+
 function PANEL:Paint(w, h)
     // -- Main
 
@@ -68,3 +72,21 @@ function PANEL:Paint(w, h)
 end
 
 vgui.Register("RUST_Loot", PANEL, "DPanel")
+
+// ------------------------------------------------------------------
+
+hook.Add("RUST_Update_Side_Panel_Slot", "RUST_Handle_Loot_Update", function(create, invData, inv, slot, itemid, amount, itemData)
+    if( IsValid(RUST.VGUI.BasePanel.rightPanel) && RUST.VGUI.BasePanel.rightPanel:GetName() == "RUST_Loot" )then
+        if( create )then
+            local Item = vgui.Create("RUST_Item", RUST.VGUI.BasePanel.rightPanel.list:GetChildren()[slot])
+            Item:SetItemID(invData[slot].itemid)
+            Item:SetAmount(invData[slot].amount)
+        else
+            if( !invData[slot] )then
+                RUST.VGUI.BasePanel.rightPanel.list:GetChildren()[slot]:GetChildren()[1]:Remove()
+            else
+                RUST.VGUI.BasePanel.rightPanel.list:GetChildren()[slot]:GetChildren()[1]:SetAmount(invData[slot].amount)
+            end
+        end
+    end
+end)

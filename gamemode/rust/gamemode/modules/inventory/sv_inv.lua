@@ -95,7 +95,7 @@ local types = { // needed for RUST_MoveItem and PlayerDeath
 }
 
 hook.Add("PlayerDeath", "RUST_ResetInventory", function(victim, inflictor, attacker)
-    netstream.Start(ply, "RUST_CloseInventory")
+    netstream.Start(ply, "RUST_Close_VGUI_Elements")
 
     local backpack = ents.Create("rust_backpack")
     backpack:SetPos(victim:GetPos())
@@ -134,7 +134,9 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
     //local fromSlotOwner = RUST.Inventories[fromSlotInv].owner
     //local toSlotOwner = RUST.Inventories[toSlotInv].owner
 
-    if( // CHECK OWNERSHIP OF THE INVS
+    // TODO: CHECK OWNERSHIP OF INVS
+
+    if(
        // fromSlotOwner && fromSlotOwner:IsPlayer() && fromSlotOwner == ply && toSlotOwner == ply 
        // || fromSlotOwner && toSlotOwner && !fromSlotOwner:IsPlayer() && toSlotOwner == ply
        // || toSlotOwner && fromSlotOwner && !toSlotOwner:IsPlayer() && fromSlotOwner == ply
@@ -366,7 +368,6 @@ netstream.Hook("RUST_Eat", function(ply, inv, slot)
                 invData[slot].amount = invData[slot].amount - 1
             end
 
-            // TODO: ITEMDATA FOOD AMOUNT
             ply:AddFood(itemData.hunger)
 
             ply.EatCoolDown = CurTime() + 2
@@ -399,6 +400,8 @@ end)
 netstream.Hook("RUST_InventoryClosed", function(ply)
     hook.Run("RUST_InventoryClosed", ply)
 end)
+
+//TODO: ADD HOOK TO CHECK IF PLY IS LOOTING AND HAS RIGHT TO MOVE STUFF IN IT!
 
 netstream.Hook("RUST_LootClosed", function(ply)
     hook.Run("RUST_LootClosed", ply)
