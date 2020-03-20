@@ -31,6 +31,7 @@ RUST.EatCoolDown = -1
 
 // ------------------------------------------------------------------
 
+// TODO: REWORK WITH HOOKS
 hook.Add("Think", "RUST_SelectSlot", function()
     for _, key in ipairs(RUST.HotbarSlotKeys) do
         if( input.IsKeyDown(key) && RUST.HotbarCoolDown && RUST.HotbarCoolDown < CurTime() && !LocalPlayer().CantSwitchSlot )then

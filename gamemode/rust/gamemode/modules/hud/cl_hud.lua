@@ -141,6 +141,11 @@ local types = {
 		text = "LOOT",
 		noTextOnOccupied = true
 	},
+	["rust_struct_furnace"] = {
+		pos = Vector(0, 0, 20),
+		text = "LOOT",
+		noTextOnOccupied = true
+	},
 }
 
 function HUD:CONTEXT_ICON(ply)

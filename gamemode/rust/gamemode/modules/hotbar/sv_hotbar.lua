@@ -15,6 +15,7 @@ RUST.HotbarSlotKeys = {
 
 // ------------------------------------------------------------------
 
+// TODO: REWORK WITH HOOKS
 netstream.Hook("RUST_ChangeSelectedSlot", function(ply, key)
     if( ( ply.HotbarCoolDown || -1 ) < CurTime() && RUST.HotbarSlotKeys[key] && !ply.CantSwitchSlot )then
         local slot = RUST.HotbarSlotKeys[key]

@@ -9,6 +9,7 @@ ENT.Author = "Aden"
 ENT.Spawnable = true
 
 ENT.IsCampfire = true
+ENT.IsLightable = true
 
 ENT.BurnTimeFac = 2.5
 ENT.MaxBurnAmount = 10
@@ -23,7 +24,7 @@ hook.Add("CanMoveItem", "RUST_HandleRawCookSpaces", function(ply, fromSlotID, fr
     local fromEnt = RUST.Inventories[fromSlotInv].owner
 
     if( toEnt.IsCampfire && toSlotID <= 6 && toSlotID >= 4 )then
-        if( !RUST.RawFood[fromSlotInvData[fromSlotID].itemid] )then
+        if( !RUST.PlaceableInCampfire[fromSlotInvData[fromSlotID].itemid] )then
             return false
         end
 
@@ -31,7 +32,7 @@ hook.Add("CanMoveItem", "RUST_HandleRawCookSpaces", function(ply, fromSlotID, fr
     elseif( fromEnt.IsCampfire && toSlotInvData[toSlotID] && fromSlotID <= 6 && fromSlotID >= 4 )then
         local itemData = RUST.Items[toSlotInvData[toSlotID].itemid]
 
-        if( !RUST.RawFood[toSlotInvData[toSlotID].itemid] )then
+        if( !RUST.PlaceableInCampfire[toSlotInvData[toSlotID].itemid] )then
             return false
         end
 

@@ -12,8 +12,8 @@ end
 netstream.Hook("RUST_OpenInventory", function()
     if( !RUST.VGUI.BasePanel )then // Wenn nicht offen, dann ... ( nicht ändern! )
         RUST.VGUI.BasePanel = vgui.Create("RUST_Base")
-        RUST.VGUI.BasePanel:OpenArmor()
-        RUST.VGUI.BasePanel:OpenCrafting()
+        //RUST.VGUI.BasePanel:OpenArmor()
+        //RUST.VGUI.BasePanel:OpenCrafting()
     end
 end)
 
@@ -135,6 +135,16 @@ netstream.Hook("RUST_OpenCampfire", function(inv)
     RUST.VGUI.Interaction:SetInv(inv)
 end)
 
+netstream.Hook("RUST_OpenFurnace", function(inv)
+    if( IsValid(RUST.VGUI.Interaction) )then
+        RUST.VGUI.Interaction:Remove()
+        RUST.VGUI.Interaction = nil
+    end
+
+    RUST.VGUI.Interaction = vgui.Create("RUST_Interaction_Furnace")
+    RUST.VGUI.Interaction:SetInv(inv)
+end)
+
 // ------------------------------------------------------------------
 
 local types = {
@@ -160,66 +170,6 @@ function RUST.MoveItem(fromSlot, toSlot) // Item im Inventar moven, von Inventar
     end
     
     if( !hook.Run("CanMoveItem", ply, fromSlot.id, fromSlot.inv, fromSlotInvData, toSlot.id, toSlot.inv, toSlotInvData) ) then return end
-
-    // check for armor inv
-
-    local armorInv = ply:GetArmorInv()
-
-    if( toSlot.inv == armorInv )then
-        local itemData = RUST.Items[fromSlotInvData[fromSlot.id].itemid]
-
-        if( !itemData.isArmor || itemData.type != types[toSlot.id] )then
-            return
-        end
-
-        ply:EmitSound("item/sfx/zipper.wav", 75)
-    elseif( fromSlot.inv == armorInv && toSlotInvData[toSlot.id] )then
-        local itemData = RUST.Items[toSlotInvData[toSlot.id].itemid]
-
-        if( !itemData.isArmor || itemData.type != types[fromSlot.id] )then
-            return
-        end
-
-        ply:EmitSound("item/sfx/zipper.wav", 75)
-    end
-
-    // check hotbar
-
-    local hotbarInv = ply:GetHotbarInv()
-
-    if( fromSlot.inv == hotbarInv && fromSlot.id == ply.CurrentSelectedSlot )then
-        local fromSlotItemData = RUST.Items[fromSlotInvData[fromSlot.id].itemid]
-
-        if( toSlotItem )then
-            local toSlotItemData = RUST.Items[toSlotInvData[toSlot.id].itemid]
-
-            if( fromSlotItemData.isWeapon && ply.CantSwitchSlot )then
-                return
-            end
-
-            if( !toSlotItemData.isWeapon && !toSlotItemData.isMelee )then
-                ply.CurrentSelectedSlot = nil
-            end
-        else
-            if( fromSlotItemData.isWeapon && ply.CantSwitchSlot )then
-                return
-            end
-
-            ply.CurrentSelectedSlot = nil
-        end
-    end
-
-    if( toSlot.inv == hotbarInv && toSlot.id == ply.CurrentSelectedSlot )then
-        local fromSlotItemData = RUST.Items[fromSlotInvData[fromSlot.id].itemid]
-
-        if( fromSlotItemData.isWeapon && ply.CantSwitchSlot || toSlotItem && RUST.Items[toSlotInvData[toSlot.id].itemid].isWeapon && ply.CantSwitchSlot )then
-            return
-        end
-
-        if( !fromSlotItemData.isWeapon && !fromSlotItemData.isMelee )then
-            ply.CurrentSelectedSlot = nil
-        end
-    end
 
     // do move stuff
 
@@ -313,20 +263,24 @@ function RUST.Split(slot) // Item splitten
     end
 end
 
-function RUST.DropItem(slot) // Item droppen
+function RUST.DropItem(slot)
     local invData = RUST.Inventories[slot.inv].slots
     local slotItem = slot:GetChildren()[1]
     local ply = LocalPlayer()
 
     if( slotItem && invData[slot.id] )then
-        slotItem:Remove()
-        invData[slot.id] = false
-
         local hotbarInv = ply:GetHotbarInv()
 
-        if( slot.inv == hotbarInv && slot.id == ply.CurrentSelectedSlot )then
+        if( slot.inv == hotbarInv && !ply.CantSwitchSlot && slot.id == ply.CurrentSelectedSlot )then
             ply.CurrentSelectedSlot = nil
+        elseif( slot.inv == hotbarInv && ply.CantSwitchSlot && slot.id == ply.CurrentSelectedSlot )then
+            return
         end
+
+        if( !hook.Run("CanDrop", ply, slot.inv, slot.id) ) then return end
+
+        slotItem:Remove()
+        invData[slot.id] = false
 
         netstream.Start("RUST_Drop", slot.inv, slot.id)
     end

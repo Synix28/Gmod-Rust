@@ -74,7 +74,7 @@ end
 // remove amount dynamically from inv
 function PLAYER:RemoveItem(inv, itemid, amount)
     local invData = RUST.Inventories[inv].slots
-    local availableAmount = RUST.GetItemAmountFromInv(self:GetInv(), itemid)
+    local availableAmount = RUST.GetItemAmountFromInv(inv, itemid)
 
     if( availableAmount && availableAmount >= amount )then
         for slot, data in ipairs(invData) do

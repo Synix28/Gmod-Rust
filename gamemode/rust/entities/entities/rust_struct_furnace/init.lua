@@ -2,16 +2,8 @@ AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include("shared.lua")
 
-sound.Add( {
-	name = "rust_fire_sound",
-	channel = CHAN_STATIC,
-	volume = 1.0,
-	level = 80,
-	sound = "env/sfx/campfire.wav"
-} )
-
 function ENT:Initialize()
-    self:SetModel("models/galaxy/rust/campfire.mdl")
+    self:SetModel("models/galaxy/rust/furnace.mdl")
     self:PhysicsInit(SOLID_VPHYSICS)
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
@@ -33,7 +25,7 @@ function ENT:Initialize()
         slots = {}
     }
 
-    for i = 1, 8 do
+    for i = 1, 9 do
         RUST.Inventories[inv].slots[i] = false
     end
 
@@ -41,7 +33,7 @@ function ENT:Initialize()
 end
 
 function ENT:GetInv()
-    return "Struct_Campfire_" .. self:EntIndex()
+    return "Struct_Furnace_" .. self:EntIndex()
 end
 
 function ENT:OnRemove()
@@ -56,7 +48,7 @@ function ENT:Use(caller, activator)
         local inv = self:GetInv()
 
         netstream.Start(caller, "RUST_SyncInventory", inv, RUST.Inventories[inv])
-        netstream.Start(caller, "RUST_OpenCampfire", inv)
+        netstream.Start(caller, "RUST_OpenFurnace", inv)
     end
 end
 
@@ -69,6 +61,8 @@ function ENT:Think()
         if( self.nextCook < CurTime() )then
             local invData = RUST.Inventories[self:GetInv()].slots
 
+            // TODO: NEW SMELT LOGIC
+            /*
             for i = 1, 3 do
                 if( invData[3 + i] )then
                     local result = RUST.RawFood[invData[3 + i].itemid]
@@ -82,6 +76,36 @@ function ENT:Think()
                         ent:SetPos( self:LocalToWorld(Vector(0, 0, 25)) )
                             ent:SetItemID(result)
                             ent:SetAmount(1)
+                        ent:Spawn()
+                    end
+                end
+            end
+            */
+
+            local maxBurnAmount = math.Round(self.MaxBurnAmount * self.BurnTimeFac)
+            // TODO: IMPLEMENT maxBurnAmount
+
+            for slot, data in ipairs(invData) do
+                local oreResult = data && RUST.RawOre[data.itemid] || false
+
+                if( oreResult )then
+                    local noSpace = false
+                    local amountToRemove
+
+                    if( data.amount >= maxBurnAmount )then
+                        amountToRemove = self.MaxBurnAmount
+                    else
+                        amountToRemove = data.amount
+                    end
+
+                    RUST.RemoveItemAmountFromSlot(self:GetInv(), slot, amountToRemove, self:GetUsedBy())
+                    noSpace = !RUST.AddItem(self:GetInv(), oreResult, amountToRemove, nil, self:GetUsedBy())
+
+                    if( noSpace )then
+                        local ent = ents.Create("rust_item")
+                        ent:SetPos( self:LocalToWorld(Vector(0, 0, 70)) )
+                            ent:SetItemID(oreResult)
+                            ent:SetAmount(amountToRemove)
                         ent:Spawn()
                     end
                 end
@@ -103,14 +127,16 @@ function ENT:CheckFireTime()
     local notFirstTime = self.fireTime != nil
 
     if( !self.fireTime || self.fireTime < CurTime() )then
-        if( invData[7] && RUST.RemoveItemAmountFromSlot(self:GetInv(), 7, self.MaxBurnAmount, self:GetUsedBy()) )then
+        local availableAmount = RUST.GetItemAmountFromInv(self:GetInv(), "wood")
+
+        if( availableAmount && availableAmount >= self.MaxBurnAmount && RUST.RemoveItemAmount(self:GetInv(), "wood", self.MaxBurnAmount, self:GetUsedBy()) )then
             self.fireTime = CurTime() + self.MaxBurnAmount * self.BurnTimeFac
             coalAmount = self.MaxBurnAmount
-        elseif( invData[7] )then
-            self.fireTime = CurTime() + invData[7].amount * self.BurnTimeFac
-            coalAmount = invData[7].amount
+        elseif( availableAmount && availableAmount > 0 )then
+            self.fireTime = CurTime() + availableAmount * self.BurnTimeFac
+            coalAmount = availableAmount
 
-            RUST.RemoveItemFromSlot(self:GetInv(), invData[7].amount, self:GetUsedBy())
+            RUST.RemoveItemAmount(self:GetInv(), "wood", availableAmount, self:GetUsedBy())
         else
             self:SetFireOn(false)
             self.nextCook = false
@@ -127,7 +153,7 @@ function ENT:CheckFireTime()
         end
     end
 
-    if( notFirstTime && coalAmount && coalAmount > 0 && !RUST.AddItemMinMax(self:GetInv(), "charcoal", math.ceil(coalAmount / 2), nil, 8, 8, self:GetUsedBy()) )then
+    if( notFirstTime && coalAmount && coalAmount > 0 && !RUST.AddItem(self:GetInv(), "charcoal", math.ceil(coalAmount / 2), nil, self:GetUsedBy()) )then
         local ent = ents.Create("rust_item")
         ent:SetPos( self:LocalToWorld(Vector(0, 0, 25)) )
             ent:SetItemID("charcoal")

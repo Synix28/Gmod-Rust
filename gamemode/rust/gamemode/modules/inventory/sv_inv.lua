@@ -9,85 +9,24 @@ hook.Add("DatabaseInitialized", "RUST_Inventory_SetupDB", function() // Tables e
     MySQLite.query("CREATE TABLE IF NOT EXISTS player_hotbar ( steamid varchar(255) NOT NULL, slot int NOT NULL, amount int NOT NULL, itemid varchar(255) NOT NULL, itemdata longtext, CONSTRAINT hid PRIMARY KEY (slot, steamid) )")
 end)
 
-hook.Add("PlayerButtonDown", "RUST_OpenInventory", function(ply, key) // Inventar öffnen
+hook.Add("PlayerButtonDown", "RUST_OpenInventory", function(ply, key)
     if( key == KEY_TAB && ply:Alive() ) then
         netstream.Start(ply, "RUST_OpenInventory")
     end
 end)
 
-hook.Add("PlayerInitialSpawn", "RUST_SetupInventory", function(ply) // Inventare erstellen, Daten abfragen und den Player updaten
-    local steamid = ply:SteamID()
+hook.Add("PlayerInitialSpawn", "RUST_SetupInventory", function(ply)
+    timer.Simple(2, function()
+        local mainInv = RUST.CreateInventory(ply:GetInv(), ply, 30)
+        local hotbarInv = RUST.CreateInventory(ply:GetHotbarInv(), ply, 6)
+        local armorInv = RUST.CreateInventory(ply:GetArmorInv(), ply, 4)
 
-    RUST.Inventories["Player_Inv_" .. steamid] = {}
-    RUST.Inventories["Player_Hotbar_" .. steamid] = {}
-    RUST.Inventories["Player_Armor_" .. steamid] = {}
-
-    RUST.Inventories["Player_Inv_" .. steamid].slots = {}
-    RUST.Inventories["Player_Hotbar_" .. steamid].slots = {}
-    RUST.Inventories["Player_Armor_" .. steamid].slots = {}
-
-    local inventory = RUST.Inventories["Player_Inv_" .. steamid].slots
-    local hotbar = RUST.Inventories["Player_Hotbar_" .. steamid].slots
-
-    RUST.Inventories["Player_Inv_" .. steamid].owner = ply
-    RUST.Inventories["Player_Hotbar_" .. steamid].owner = ply
-    RUST.Inventories["Player_Armor_" .. steamid].owner = ply
-
-    // ------------
-
-    MySQLite.begin()
-
-    MySQLite.queueQuery("SELECT itemid, amount, slot FROM player_inventory WHERE steamid = '" .. ply:SteamID() .. "' ORDER BY slot ", function(data)
-        data = data || {}
-
-        for i = 1, 30 do
-            inventory[i] = false
-        end
-
-        for _, item in ipairs(data) do
-            inventory[item.slot] = {
-                itemid = item.itemid,
-                amount = item.amount
-            }
-        end
-    end)
-
-    MySQLite.queueQuery("SELECT itemid, amount, slot FROM player_hotbar WHERE steamid = '" .. ply:SteamID() .. "' ORDER BY slot ", function(data)
-        data = data || {}
-
-        for i = 1, 6 do
-            hotbar[i] = false
-        end
-
-        for _, item in ipairs(data) do
-            hotbar[item.slot] = {
-                itemid = item.itemid,
-                amount = item.amount
-            }
-        end
-    end)
-
-    MySQLite.commit(function()
-        timer.Simple(2, function()
-            if( !ply || !IsValid(ply) ) then return end
-
-            local armorInv = "Player_Armor_" .. ply:SteamID()
-
-            for i = 1, 4 do
-                RUST.Inventories[armorInv].slots[i] = false
-            end
-
-            netstream.Start(ply, "RUST_SyncInventory", "Player_Inv_" .. ply:SteamID(), RUST.Inventories["Player_Inv_" .. ply:SteamID()])
-            netstream.Start(ply, "RUST_SyncInventory", "Player_Hotbar_" .. ply:SteamID(), RUST.Inventories["Player_Hotbar_" .. ply:SteamID()])
-            netstream.Start(ply, "RUST_SyncInventory", "Player_Armor_" .. ply:SteamID(), RUST.Inventories["Player_Armor_" .. ply:SteamID()])
-
-            netstream.Start(ply, "RUST_CreateHotbar")
-        end)
+        print(mainInv:AddItem("wood", 100))
     end)
 end)
 
 // TODO: OPTIMIZE THIS!
-local types = { // needed for RUST_MoveItem and PlayerDeath 
+local types = {
     RUST_ARMOR_TYPE_HEAD,
     RUST_ARMOR_TYPE_CHEST,
     RUST_ARMOR_TYPE_LEGS,
@@ -147,103 +86,6 @@ netstream.Hook("RUST_MoveItem", function(ply, fromSlotID, fromSlotInv, toSlotID,
         local toSlotInvData = RUST.Inventories[toSlotInv].slots
 
         if( !hook.Run("CanMoveItem", ply, fromSlotID, fromSlotInv, fromSlotInvData, toSlotID, toSlotInv, toSlotInvData) ) then return end
-
-        // check for armor inv
-
-        local armorInv = ply:GetArmorInv()
-
-        if( toSlotInv == armorInv )then
-            local itemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
-
-            if( !itemData.isArmor || itemData.type != types[toSlotID] )then
-                return
-            end
-
-            for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
-                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
-            end
-
-            for k, bodygroupData in ipairs(itemData.bodygroups) do
-                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
-            end
-        elseif( fromSlotInv == armorInv && toSlotInvData[toSlotID] )then
-            local itemData = RUST.Items[toSlotInvData[toSlotID].itemid]
-
-            if( !itemData.isArmor || itemData.type != types[fromSlotID] )then
-                return
-            end
-
-            for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
-                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
-            end
-
-            for k, bodygroupData in ipairs(itemData.bodygroups) do
-                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
-            end
-        elseif( fromSlotInv == armorInv && !toSlotInvData[toSlotID] )then
-            local itemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
-
-            for k, bodygroupData in ipairs(RUST.DefaultBodyGroups[itemData.type]) do
-                ply:SetBodygroup(bodygroupData[1], bodygroupData[2])
-            end
-        end
-
-        // check hotbar
-
-        local hotbarInv = ply:GetHotbarInv()
-
-        if( fromSlotInv == hotbarInv && fromSlotID == ply.CurrentSelectedSlot )then
-            local fromSlotItemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
-
-            if( toSlotInvData[toSlotID] )then
-                local toSlotItemData = RUST.Items[toSlotInvData[toSlotID].itemid]
-
-                if( fromSlotItemData.isWeapon && ply.CantSwitchSlot )then
-                    return
-                end
-
-                if( toSlotItemData.isWeapon || toSlotItemData.isMelee )then
-                    ply:StripWeapons()
-                    ply:Give(toSlotItemData.ent, true)
-
-                    if( toSlotItemData.isWeapon )then
-                        ply:GetActiveWeapon():SetClip1(toSlotInvData[toSlotID].itemData.clip)
-                    end
-                else
-                    ply:StripWeapons()
-                    ply.CurrentSelectedSlot = nil
-                end
-            else
-                if( fromSlotItemData.isWeapon && ply.CantSwitchSlot )then
-                    return
-                end
-
-                ply:StripWeapons()
-                ply.CurrentSelectedSlot = nil
-            end
-        end
-
-        if( toSlotInv == hotbarInv && toSlotID == ply.CurrentSelectedSlot )then
-            local fromSlotItemData = RUST.Items[fromSlotInvData[fromSlotID].itemid]
-
-            if( fromSlotItemData.isWeapon && ply.CantSwitchSlot || toSlotInvData[toSlotID] && RUST.Items[toSlotInvData[toSlotID].itemid].isWeapon && ply.CantSwitchSlot )then
-                return
-            end
-
-            if( fromSlotItemData.isWeapon || fromSlotItemData.isMelee )then
-                ply:StripWeapons()
-                ply:Give(fromSlotItemData.ent, true)
-
-                if( fromSlotItemData.isWeapon )then
-                    ply:GetActiveWeapon():SetClip1(fromSlotInvData[fromSlotID].itemData.clip)
-                end
-            else
-                print("ff")
-
-                ply:StripWeapons()
-                ply.CurrentSelectedSlot = nil
-            end
-        end
 
         // do move stuff
 
@@ -317,17 +159,6 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
     local invData = RUST.Inventories[inv].slots
 
     if( invData[slot] )then
-        local ent = ents.Create("rust_item")
-        ent:SetPos( ply:EyePos() + ply:GetAimVector() * 50 )
-            ent:SetItemID(invData[slot].itemid)
-            ent:SetAmount(invData[slot].amount)
-
-            if( invData[slot].itemData )then
-                ent:SetItemData(invData[slot].itemData)
-            end
-
-        ent:Spawn()
-
         local armorInv = ply:GetArmorInv()
 
         if( inv == armorInv )then
@@ -344,6 +175,19 @@ netstream.Hook("RUST_Drop", function(ply, inv, slot) // Item droppen SV
             ply:StripWeapons()
             ply.CurrentSelectedSlot = nil
         end
+
+        if( !hook.Run("CanDrop", ply, inv, slot) ) then return end
+
+        local ent = ents.Create("rust_item")
+        ent:SetPos( ply:EyePos() + ply:GetAimVector() * 50 )
+            ent:SetItemID(invData[slot].itemid)
+            ent:SetAmount(invData[slot].amount)
+
+            if( invData[slot].itemData )then
+                ent:SetItemData(invData[slot].itemData)
+            end
+
+        ent:Spawn()
 
         invData[slot] = false
     end
@@ -401,14 +245,12 @@ netstream.Hook("RUST_InventoryClosed", function(ply)
     hook.Run("RUST_InventoryClosed", ply)
 end)
 
-//TODO: ADD HOOK TO CHECK IF PLY IS LOOTING AND HAS RIGHT TO MOVE STUFF IN IT!
-
 netstream.Hook("RUST_LootClosed", function(ply)
     hook.Run("RUST_LootClosed", ply)
 end)
 
 netstream.Hook("RUST_LightFire", function(ply, ent)
-    if( ent.IsCampfire && ply:GetPos():Distance(ent:GetPos()) < 300 )then
+    if( ent.IsLightable && ply:GetPos():Distance(ent:GetPos()) < 300 )then
         ent:LightFire()
     end
 end)
@@ -431,5 +273,3 @@ end)
 hook.Add("RUST_LootClosed", "RUST_Looting", function(ply)
     RUST.CheckLooting(ply)
 end)
-
-// ------------------------------------------------------------------

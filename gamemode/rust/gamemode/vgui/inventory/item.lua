@@ -50,24 +50,26 @@ function PANEL:Init()
 end
 
 function PANEL:Paint(w, h)
-    if( !self.itemid || !self.amount || !self.PaintingDragging && dragndrop.IsDragging() && dragndrop.m_DraggingMain && dragndrop.m_DraggingMain == self ) then return end
+    local item = self:GetItem()
+
+    if( !item || !item:GetItemID() || !item:GetAmount() || !self.PaintingDragging && dragndrop.IsDragging() && dragndrop.m_DraggingMain && dragndrop.m_DraggingMain == self ) then return end
 
     surface.SetDrawColor(255, 255, 255, 255)
-    surface.SetMaterial(RUST.Items[self.itemid].icon)
+    surface.SetMaterial(RUST.Items[item:GetItemID()].icon)
     surface.DrawTexturedRect(3, 3, 64, 64)
 
-    if( RUST.Items[self.itemid].isResource || RUST.Items[self.itemid].isAmmo || RUST.Items[self.itemid].isFood )then
-        draw.SimpleText("x" .. self.amount, "Rust_Item_Amount", w, h - 7, Color(255, 255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+    if( RUST.Items[item:GetItemID()].isResource || RUST.Items[item:GetItemID()].isAmmo || RUST.Items[item:GetItemID()].isFood )then
+        draw.SimpleText("x" .. item:GetAmount(), "Rust_Item_Amount", w, h - 7, Color(255, 255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
     end
 
-    if( RUST.Items[self.itemid].isWeapon )then
+    if( RUST.Items[item:GetItemID()].isWeapon )then
         local slot = self:GetParent()
 
         if( slot )then
-            local slotData = RUST.Inventories[slot.inv].slots[slot.id]
+            local slotData = item:GetSlot()
 
-            if( slotData && slotData.itemData )then
-                draw.SimpleText(slotData.itemData.clip, "Rust_Item_Amount", w, h - 7, Color(255, 165, 0, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+            if( slotData && slotData:GetItemData() && slotData:GetItemData().clip )then
+                draw.SimpleText(slotData:GetItemData().clip, "Rust_Item_Amount", w, h - 7, Color(255, 165, 0, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
             end
         end
     end
@@ -75,8 +77,7 @@ function PANEL:Paint(w, h)
     if( self:IsHovered() && ( !self.tooltip || !IsValid(self.tooltip) ) )then
         self.tooltip = vgui.Create("RUST_Tooltip")
         self.tooltip:SetPos(gui.MouseX() + 30, gui.MouseY())
-        self.tooltip:SetItemID(self.itemid)
-        self.tooltip:SetAmount(self.amount)
+        self.tooltip:SetItem(item)
         self.tooltip:MakePopup()
         self.tooltip:MoveToFront()
     elseif( self:IsHovered() && self.tooltip && IsValid(self.tooltip) )then
@@ -92,12 +93,12 @@ function PANEL:Paint(w, h)
     end
 end
 
-function PANEL:SetItemID(itemid)
-    self.itemid = itemid
+function PANEL:SetItem(item)
+    self.item = item
 end
 
-function PANEL:SetAmount(amount)
-    self.amount = amount
+function PANEL:GetItem()
+    return self.item
 end
 
 function PANEL:OnRemove()
@@ -121,7 +122,8 @@ function PANEL:OnMousePressed(key)
 end
 
 function PANEL:OpenOptions()
-    local itemData = RUST.Items[self.itemid]
+    local item = self:GetItem()
+    local itemData = RUST.Items[item:GetItemID()]
 
     if( itemData.isResource || itemData.isAmmo )then
         self.menu = DermaMenu()
@@ -222,18 +224,20 @@ function PANEL:Init()
     self:SetSize(205, 125)
 end
 
-function PANEL:SetItemID(itemid)
-    self.itemid = itemid
+function PANEL:SetItem(item)
+    self.item = item
 end
 
-function PANEL:SetAmount(amount)
-    self.amount = amount
+function PANEL:GetItem()
+    return self.item
 end
 
 function PANEL:Paint(w, h)
-    if( !self.itemid || !self.amount )then return end
+    local item = self:GetItem()
 
-    local itemData = RUST.Items[self.itemid]
+    if( !item || !item:GetItemID() || !item:GetAmount() )then return end
+
+    local itemData = RUST.Items[item:GetItemID()]
 
     surface.SetDrawColor(25, 25, 25, 255)
     surface.DrawRect(0, 0, w, h)

@@ -33,18 +33,15 @@ function PANEL:Init()
     self.list:SetSpaceY( 10 )
     self.list:SetSpaceX( 10 )
 
-    local inv = "Player_Inv_" .. LocalPlayer():SteamID()
-    local invData = RUST.Inventories[inv].slots
+    local inv = RUST.GetInventoryByID(LocalPlayer():GetInv())
 
-    for i = 1, 30 do
-        local Slot = self.list:Add( "RUST_Slot" )
-        Slot:SetID( i )
-        Slot:SetInv(inv)
+    for id, slot in ipairs(inv:GetSlots()) do
+        local SlotPanel = self.list:Add( "RUST_Slot" )
+        SlotPanel:SetSlot(slot)
 
-        if( invData[i] ) then
-            local Item = vgui.Create("RUST_Item", Slot)
-            Item:SetItemID(invData[i].itemid)
-            Item:SetAmount(invData[i].amount)
+        if( slot:HasItem() ) then
+            local Item = vgui.Create("RUST_Item", SlotPanel)
+            Item:SetItem(slot:GetItem())
         end
     end
 end

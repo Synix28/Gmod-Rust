@@ -107,6 +107,11 @@ function ENT:Initialize()
         itemid = "raw_chicken",
         amount = 100
     }
+
+    RUST.Inventories[inv].slots[16] = {
+        itemid = "sulfur_ore",
+        amount = 250
+    }
 end
 
 function ENT:GetInv()

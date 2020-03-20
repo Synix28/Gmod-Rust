@@ -96,6 +96,12 @@ function PANEL:OpenCampfire(inv)
     self.rightPanel:SetInv(inv)
 end
 
+function PANEL:OpenFurnace(inv)
+    self:CheckRightPanel()
+    self.rightPanel = vgui.Create("RUST_Furnace", self)
+    self.rightPanel:SetInv(inv)
+end
+
 function PANEL:Paint(w, h)
 end
 

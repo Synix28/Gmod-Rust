@@ -581,13 +581,23 @@ RUST.Items["cooked_chicken"] = {
 
 // ------------------------------------------------------------------
 
+RUST.PlaceableInCampfire = {
+    ["raw_chicken"] = true,
+}
+
+RUST.PlaceableInFurnace = {
+    ["metal_ore"] = true,
+    ["sulfur_ore"] = true,
+    ["wood"] = true
+}
+
 RUST.RawFood = {
     ["raw_chicken"] = "cooked_chicken"
 }
 
-RUST.Ores = {
-    ["metal_ore"] = true,
-    ["sulfur_ore"] = true
+RUST.RawOre = {
+    ["metal_ore"] = "metal_fragments",
+    ["sulfur_ore"] = "sulfur"
 }
 
 // ------------------------------------------------------------------
@@ -720,6 +730,78 @@ function RUST.HasSpaceForAmountMinMax(inv, itemid, amount, minSlot, maxSlot)
     return false
 end
 
+function RUST.AddItem(inv, itemid, amount, itemData, ply)
+    local invData = RUST.Inventories[inv].slots
+    local freeSlots = RUST.HasSpaceForAmount(inv, itemid, amount)
+
+    local max = RUST.Items[itemid].max
+
+    if( freeSlots )then
+        local remainingAmount = amount
+
+        for _, slot in ipairs(freeSlots) do
+            local data = invData[slot]
+
+            if( data && data.amount < max )then
+                local freeAmount = max - data.amount
+
+                if( freeAmount <= remainingAmount )then
+                    invData[slot].amount = max
+                    remainingAmount = remainingAmount - freeAmount
+                elseif( freeAmount > remainingAmount )then
+                    invData[slot].amount = invData[slot].amount + remainingAmount
+                    remainingAmount = 0
+                end
+
+                if( itemData )then
+                    invData[slot].itemData = itemData
+
+                    if( ply )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount, invData[slot].itemData)
+                    end
+                else
+                    if( ply )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                    end
+                end
+            end
+
+            if( !data )then
+                invData[slot] = {}
+                invData[slot].itemid = itemid
+
+                if( remainingAmount >= max )then
+                    invData[slot].amount = max
+                    remainingAmount = remainingAmount - max
+                else
+                    invData[slot].amount = remainingAmount
+                    remainingAmount = 0
+                end
+
+                if( itemData )then
+                    invData[slot].itemData = itemData
+
+                    if( ply )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount, invData[slot].itemData)
+                    end
+                else
+                    if( ply )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                    end
+                end
+            end
+
+            if( remainingAmount <= 0 )then
+                break
+            end
+        end
+
+        return true
+    end
+
+    return false
+end
+
 function RUST.AddItemMinMax(inv, itemid, amount, itemData, min, max, ply)
     local invData = RUST.Inventories[inv].slots
     local freeSlots = RUST.HasSpaceForAmountMinMax(inv, itemid, amount, min, max)
@@ -821,6 +903,43 @@ function RUST.RemoveItemAmountFromSlot(inv, slot, amount, ply)
 
         if( invData[slot].amount <= 0 )then
             invData[slot] = false
+        end
+
+        return true
+    end
+
+    return false
+end
+
+function RUST.RemoveItemAmount(inv, itemid, amount, ply)
+    local invData = RUST.Inventories[inv].slots
+    local availableAmount = RUST.GetItemAmountFromInv(inv, itemid)
+
+    if( availableAmount && availableAmount >= amount )then
+        for slot, data in ipairs(invData) do
+            if( data && data.itemid == itemid )then
+                if( data.amount <= amount )then
+                    local amountToRemove = data.amount
+
+                    invData[slot] = false
+                    amount = amount - amountToRemove
+                else
+                    invData[slot].amount = invData[slot].amount - amount
+                    amount = 0
+                end
+
+                if( ply )then
+                    if( !invData[slot] )then
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, 0)
+                    else
+                        netstream.Start(ply, "RUST_UpdateSlot", inv, slot, itemid, invData[slot].amount)
+                    end
+                end
+
+                if( amount <= 0 )then
+                    break
+                end
+            end
         end
 
         return true
